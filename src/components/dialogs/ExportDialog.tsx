@@ -90,46 +90,43 @@ export function ExportDialog({ scope: minimalScope }: { scope: Scope }) {
   return (
     <Modal
       title={t('ex.title')}
-      icon={<Download className="h-5 w-5 text-accent" />}
+      icon={<Download className="i20 c-accent" />}
       onClose={closeDialog}
       busy={working}
       footer={
         <>
           <Button onClick={closeDialog}>{t('cancel')}</Button>
-          <Button variant="primary" icon={<Download className="h-3.5 w-3.5" />} loading={working} disabled={scopeApps.length === 0 || fields.length === 0} onClick={() => void run()}>
+          <Button variant="primary" icon={<Download className="i14" />} loading={working} disabled={scopeApps.length === 0 || fields.length === 0} onClick={() => void run()}>
             {t('ex.button')} ({scopeApps.length})
           </Button>
         </>
       }
     >
-      <div className="space-y-5 text-[13px]">
+      <div className="stack-20 dialog-muted">
         <section>
-          <div className="mb-2 text-[11px] font-semibold tracking-wider text-fg3 uppercase">{t('ex.format')}</div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="section-title section-title--mid">{t('ex.format')}</div>
+          <div className="export-grid-3">
             {FORMATS.map((f) => (
               <button
                 key={f.value}
                 type="button"
                 onClick={() => setFormat(f.value)}
-                className={cn(
-                  'flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors',
-                  format === f.value ? 'border-accent bg-accent-soft' : 'border-stroke hover:border-stroke-strong',
-                )}
+                className={cn('export-format t-colors', format === f.value ? 'export-format--on' : 'export-format--off')}
               >
-                <f.icon className={cn('h-5 w-5', format === f.value ? 'text-accent' : 'text-fg3')} />
-                <span className="font-semibold">{f.label}</span>
-                <span className="text-[11px] text-fg2">{f.hint}</span>
+                <f.icon className={cn('i20', format === f.value ? 'export-format-icon--on' : 'export-format-icon--off')} />
+                <span className="export-format-name">{f.label}</span>
+                <span className="export-format-hint">{f.hint}</span>
               </button>
             ))}
           </div>
         </section>
 
         <section>
-          <div className="mb-2 text-[11px] font-semibold tracking-wider text-fg3 uppercase">{t('ex.scope')}</div>
-          <div className="space-y-1.5">
+          <div className="section-title section-title--mid">{t('ex.scope')}</div>
+          <div className="export-scope-list">
             {scopeOptions.map((o) => (
-              <label key={o.value} className={cn('flex cursor-pointer items-center gap-2', o.disabled && 'cursor-not-allowed opacity-50')}>
-                <input type="radio" name="scope" className="accent-accent" checked={scope === o.value} disabled={o.disabled} onChange={() => setScope(o.value)} />
+              <label key={o.value} className={cn('export-scope', o.disabled && 'is-disabled')}>
+                <input type="radio" name="scope" className="export-scope-radio" checked={scope === o.value} disabled={o.disabled} onChange={() => setScope(o.value)} />
                 {o.label}
               </label>
             ))}
@@ -137,18 +134,18 @@ export function ExportDialog({ scope: minimalScope }: { scope: Scope }) {
         </section>
 
         <section>
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-semibold tracking-wider text-fg3 uppercase">{t('ex.fields')}</span>
-            <div className="flex gap-2 text-xs">
-              <button type="button" className="text-accent hover:underline" onClick={() => setFields(ALL_EXPORT_FIELDS)}>
+          <div className="export-fields-head">
+            <span className="section-title">{t('ex.fields')}</span>
+            <div className="export-fields-actions">
+              <button type="button" className="link-accent" onClick={() => setFields(ALL_EXPORT_FIELDS)}>
                 {t('selectAll')}
               </button>
-              <button type="button" className="text-fg2 hover:underline" onClick={() => setFields(['name'])}>
+              <button type="button" className="link-muted" onClick={() => setFields(['name'])}>
                 {t('clearSelection')}
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <div className="export-grid-2">
             {ALL_EXPORT_FIELDS.map((f) => (
               <Checkbox key={f} checked={fields.includes(f)} onChange={(on) => toggleField(f, on)} label={t(FIELD_LABEL[f])} />
             ))}

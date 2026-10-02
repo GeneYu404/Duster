@@ -138,14 +138,14 @@ export function ContextMenu() {
       ref={ref}
       role="menu"
       style={{ left: pos?.x ?? menu.x, top: pos?.y ?? menu.y, visibility: pos ? 'visible' : 'hidden' }}
-      className="fixed z-40 min-w-[220px] rounded-lg border border-stroke bg-acrylic p-1 text-[13px] text-fg shadow-flyout backdrop-blur-2xl"
+      className="context-menu"
     >
-      <div className="truncate border-b border-stroke px-2.5 py-1.5 text-[11px] text-fg2">
+      <div className="menu-head">
         {multi ? t('detail.multi', { count: selected.length }) : app.name}
       </div>
       {entries.map((e, i) =>
         e === 'sep' ? (
-          <div key={`sep-${i}`} className="my-1 h-px bg-stroke" />
+          <div key={`sep-${i}`} className="menu-sep" />
         ) : (
           <button
             key={e.id}
@@ -156,14 +156,10 @@ export function ContextMenu() {
               close();
               e.onSelect();
             }}
-            className={cn(
-              'flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition-colors disabled:opacity-40',
-              e.danger ? 'text-danger hover:bg-danger-soft' : 'hover:bg-subtle',
-              'disabled:hover:bg-transparent',
-            )}
+            className={cn('menu-item t-colors', e.danger && 'menu-item--danger')}
           >
-            {e.icon && <e.icon className="h-4 w-4 shrink-0 opacity-80" />}
-            <span className="flex-1">{e.label}</span>
+            {e.icon && <e.icon className="menu-icon" />}
+            <span className="menu-label">{e.label}</span>
           </button>
         ),
       )}

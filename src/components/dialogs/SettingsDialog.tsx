@@ -30,7 +30,7 @@ export function SettingsDialog() {
   return (
     <Modal
       title={t('st.title')}
-      icon={<SettingsIcon className="h-5 w-5 text-accent" />}
+      icon={<SettingsIcon className="i20 c-accent" />}
       onClose={closeDialog}
       size="lg"
       footer={
@@ -42,11 +42,11 @@ export function SettingsDialog() {
         </>
       }
     >
-      <div className="grid gap-x-8 md:grid-cols-2">
+      <div className="dialog-cols">
         <div>
           <SectionTitle>{t('st.appearance')}</SectionTitle>
-          <div className="flex items-center justify-between py-2">
-            <span className="text-[13px]">{t('st.theme')}</span>
+          <div className="dialog-setting-row">
+            <span className="dialog-setting-label">{t('st.theme')}</span>
             <Segmented<Theme>
               value={draft.theme}
               onChange={(theme) => patch({ theme })}
@@ -57,8 +57,8 @@ export function SettingsDialog() {
               ]}
             />
           </div>
-          <div className="flex items-center justify-between py-2">
-            <span className="text-[13px]">{t('st.language')}</span>
+          <div className="dialog-setting-row">
+            <span className="dialog-setting-label">{t('st.language')}</span>
             <Select value={draft.language} onChange={(e) => patch({ language: e.target.value as Language })}>
               <option value="zh-CN">简体中文</option>
               <option value="en-US">English</option>
@@ -82,8 +82,8 @@ export function SettingsDialog() {
           <Toggle checked={draft.scanAfterUninstall} disabled={!draft.enableLeftoverScan} onChange={(v) => patch({ scanAfterUninstall: v })} label={t('st.scanAfter')} />
 
           <SectionTitle>{t('st.advanced')}</SectionTitle>
-          <div className="flex items-center justify-between py-2">
-            <span className="text-[13px]">{t('st.logLevel')}</span>
+          <div className="dialog-setting-row">
+            <span className="dialog-setting-label">{t('st.logLevel')}</span>
             <Select value={draft.logLevel} onChange={(e) => patch({ logLevel: e.target.value as LogLevel })}>
               {(['error', 'warn', 'info', 'debug', 'trace'] as LogLevel[]).map((l) => (
                 <option key={l} value={l}>
@@ -92,17 +92,17 @@ export function SettingsDialog() {
               ))}
             </Select>
           </div>
-          <div className="py-2">
-            <div className="mb-1 text-[13px]">{t('st.backupDir')}</div>
-            <div className="flex gap-1.5">
+          <div className="dialog-field-block">
+            <div className="dialog-field-label">{t('st.backupDir')}</div>
+            <div className="path-row">
               <input
                 value={draft.backupDirectory}
                 onChange={(e) => patch({ backupDirectory: e.target.value })}
                 spellCheck={false}
-                className="h-8 min-w-0 flex-1 rounded-md border border-stroke bg-card px-2 font-mono text-[12px] focus:border-accent focus:outline-none"
+                className="path-input"
               />
               <Button
-                icon={<FolderOpen className="h-3.5 w-3.5" />}
+                icon={<FolderOpen className="i14" />}
                 disabled={backend !== 'tauri'}
                 title={backend !== 'tauri' ? 'Tauri only' : undefined}
                 onClick={() => {

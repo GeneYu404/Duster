@@ -12,7 +12,6 @@ import type { TKey } from '../i18n';
 
 const ROW_H = 34;
 const GRID = 'minmax(260px, 2.4fr) minmax(150px, 1.3fr) 130px 92px 104px 60px';
-const MIN_W = 'min-w-[820px]';
 
 const COLUMNS: { key: SortKey; label: TKey; align?: 'right' }[] = [
   { key: 'name', label: 'name' },
@@ -45,27 +44,24 @@ const Row = memo(function Row({ app, selected, focused, striped, style, kindLabe
       onContextMenu={(e) => onContextMenu(e, app)}
       onDoubleClick={() => onDoubleClick(app)}
       className={cn(
-        'grid cursor-default items-center border-b border-stroke px-3 text-[13px] select-none',
-        MIN_W,
-        selected
-          ? 'bg-accent-soft text-fg'
-          : cn('text-fg2 hover:bg-subtle', striped ? 'bg-layer-solid' : 'bg-card'),
-        focused && 'ring-1 ring-inset ring-accent/70',
+        'row',
+        selected ? 'row--sel' : striped ? 'row--striped' : 'row--plain',
+        focused && 'row--focused',
       )}
     >
-      <div className="flex min-w-0 items-center gap-2.5 pr-3">
+      <div className="cell-name">
         <AppIcon appId={app.id} name={app.name} size={18} />
         <span className="truncate">{app.name}</span>
         {app.kind !== 'program' && <Badge tone={KIND_TONE[app.kind]}>{kindLabel}</Badge>}
         {!app.uninstallString && !app.quietUninstallString && app.kind !== 'store' && (
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-warning" title="No uninstall command" />
+          <span className="warn-dot" title="No uninstall command" />
         )}
       </div>
-      <div className="truncate pr-3 text-fg2">{app.publisher ?? '—'}</div>
-      <div className="truncate pr-3 font-mono text-[12px] text-fg2">{app.version ?? '—'}</div>
-      <div className="pr-3 text-right tabular-nums text-fg2">{formatKb(app.estimatedSizeKb)}</div>
-      <div className="tabular-nums text-fg2">{app.installDate ?? '—'}</div>
-      <div className="text-[11px] text-fg3">{app.architecture === 'unknown' ? '—' : app.architecture}</div>
+      <div className="cell-pub">{app.publisher ?? '—'}</div>
+      <div className="cell-ver">{app.version ?? '—'}</div>
+      <div className="cell-size">{formatKb(app.estimatedSizeKb)}</div>
+      <div className="cell-date">{app.installDate ?? '—'}</div>
+      <div className="cell-arch">{app.architecture === 'unknown' ? '—' : app.architecture}</div>
     </div>
   );
 });
@@ -217,9 +213,9 @@ export function AppTable() {
   const items = virtualizer.getVirtualItems();
 
   return (
-    <div className="relative flex h-full min-w-0 flex-1 flex-col bg-card">
-      <div ref={headerRef} className="shrink-0 overflow-hidden border-b border-stroke bg-layer-solid">
-        <div role="row" className={cn('grid px-3', MIN_W)} style={{ gridTemplateColumns: GRID }}>
+    <div className="table">
+      <div ref={headerRef} className="table-head">
+        <div role="row" className="table-grid" style={{ gridTemplateColumns: GRID }}>
           {COLUMNS.map((c) => {
             const active = sortKey === c.key;
             return (
@@ -227,14 +223,10 @@ export function AppTable() {
                 key={c.key}
                 type="button"
                 onClick={() => setSort(c.key)}
-                className={cn(
-                  'flex h-8 items-center gap-1 pr-3 text-left text-[11px] font-semibold tracking-wide uppercase select-none hover:text-fg',
-                  active ? 'text-accent' : 'text-fg2',
-                  c.align === 'right' && 'justify-end',
-                )}
+                className={cn('col-btn', active ? 'col-btn--on' : 'col-btn--off', c.align === 'right' && 'col-btn--right')}
               >
                 <span className="truncate">{t(c.label)}</span>
-                {active && (sortDir === 'asc' ? <ArrowUp className="h-3 w-3 shrink-0" /> : <ArrowDown className="h-3 w-3 shrink-0" />)}
+                {active && (sortDir === 'asc' ? <ArrowUp className="sort-icon" /> : <ArrowDown className="sort-icon" />)}
               </button>
             );
           })}
@@ -247,7 +239,7 @@ export function AppTable() {
         role="grid"
         aria-rowcount={rows.length}
         onKeyDown={onKeyDown}
-        className="win-scroll min-h-0 flex-1 overflow-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
+        className="win-scroll table-scroll"
       >
         {rows.length > 0 && (
           <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
@@ -272,11 +264,11 @@ export function AppTable() {
         )}
 
         {rows.length === 0 && initialised && !loading && (
-          <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center text-fg2">
-            {totalApps === 0 ? <PackageSearch className="h-10 w-10 text-fg3" /> : <SearchX className="h-10 w-10 text-fg3" />}
-            <div className="text-sm">{totalApps === 0 ? t('table.empty') : t('table.noMatch')}</div>
+          <div className="table-empty">
+            {totalApps === 0 ? <PackageSearch className="i40 c-fg3" /> : <SearchX className="i40 c-fg3" />}
+            <div className="t-sm">{totalApps === 0 ? t('table.empty') : t('table.noMatch')}</div>
             {query && (
-              <button type="button" className="text-xs text-accent hover:underline" onClick={() => setQuery('')}>
+              <button type="button" className="table-empty-action" onClick={() => setQuery('')}>
                 {t('table.clearSearch')}
               </button>
             )}
@@ -285,8 +277,8 @@ export function AppTable() {
       </div>
 
       {loading && !initialised && (
-        <div className="absolute inset-0 top-8 flex flex-col items-center justify-center gap-3 bg-card/80 text-sm text-fg2">
-          <Spinner className="h-6 w-6" />
+        <div className="table-loading">
+          <Spinner className="spinner--lg" />
           {t('table.loading')}
         </div>
       )}

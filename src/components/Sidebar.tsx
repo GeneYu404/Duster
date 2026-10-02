@@ -57,37 +57,30 @@ export function Sidebar() {
         key={key}
         type="button"
         onClick={() => setFilter(key)}
-        className={cn(
-          'group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition-colors',
-          active
-            ? 'bg-accent-soft font-medium text-accent'
-            : 'text-fg2 hover:bg-subtle hover:text-fg',
-        )}
+        className={cn('nav-item t-colors', active && 'nav-item--active')}
       >
-        <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-accent' : 'text-fg3 group-hover:text-fg2')} />
-        <span className="flex-1 truncate">{t(label)}</span>
-        <span className={cn('rounded-full px-1.5 text-[11px] tabular-nums', active ? 'bg-accent text-on-accent' : 'bg-subtle text-fg3')}>
-          {counts[key]}
-        </span>
+        <Icon className="nav-icon" />
+        <span className="nav-text">{t(label)}</span>
+        <span className="nav-count">{counts[key]}</span>
       </button>
     );
   };
 
   return (
-    <aside className="hidden w-52 shrink-0 flex-col border-r border-stroke bg-layer-solid md:flex">
-      <div className="win-scroll flex-1 overflow-auto p-2">
-        <div className="px-2 pt-1 pb-1.5 text-[10px] font-semibold tracking-wider text-fg3 uppercase">{t('sidebar.categories')}</div>
-        <div className="space-y-0.5">{CATEGORIES.map(renderItem)}</div>
-        <div className="px-2 pt-4 pb-1.5 text-[10px] font-semibold tracking-wider text-fg3 uppercase">{t('sidebar.quick')}</div>
-        <div className="space-y-0.5">{QUICK.map(renderItem)}</div>
+    <aside className="sidebar">
+      <div className="win-scroll sidebar-scroll">
+        <div className={cn('group-label', 'sidebar-group')}>{t('sidebar.categories')}</div>
+        <div className="sidebar-list stack-2">{CATEGORIES.map(renderItem)}</div>
+        <div className={cn('group-label', 'sidebar-group', 'sidebar-group--spaced')}>{t('sidebar.quick')}</div>
+        <div className="sidebar-list stack-2">{QUICK.map(renderItem)}</div>
         {(!settings.showSystemComponents || !settings.showUpdates) && (
-          <p className="mt-4 px-2 text-[11px] leading-relaxed text-fg3">{t('sidebar.hiddenHint')}</p>
+          <p className="sidebar-hint">{t('sidebar.hiddenHint')}</p>
         )}
       </div>
-      <div className="border-t border-stroke px-3 py-2.5">
-        <div className="text-[10px] font-semibold tracking-wider text-fg3 uppercase">{t('sidebar.totalSize')}</div>
-        <div className="mt-0.5 text-[15px] font-semibold tabular-nums text-fg">{formatKb(visibleSize)}</div>
-        <div className="text-[11px] text-fg2">{t('items', { count: visible.length })}</div>
+      <div className="sidebar-foot">
+        <div className="group-label">{t('sidebar.totalSize')}</div>
+        <div className="sidebar-size">{formatKb(visibleSize)}</div>
+        <div className="sidebar-count">{t('items', { count: visible.length })}</div>
       </div>
     </aside>
   );

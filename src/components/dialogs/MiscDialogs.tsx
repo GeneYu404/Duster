@@ -46,7 +46,7 @@ export function DeleteEntryDialog({ appId }: { appId: string }) {
     <Modal
       title={t('de.title')}
       subtitle={app.name}
-      icon={<ListX className="h-5 w-5 text-danger" />}
+      icon={<ListX className="i20 c-danger" />}
       onClose={closeDialog}
       busy={working}
       footer={
@@ -54,24 +54,24 @@ export function DeleteEntryDialog({ appId }: { appId: string }) {
           <Button onClick={closeDialog} disabled={working}>
             {t('cancel')}
           </Button>
-          <Button variant="danger" icon={<Trash2 className="h-3.5 w-3.5" />} disabled={!ack} loading={working} onClick={() => void run()}>
+          <Button variant="danger" icon={<Trash2 className="i14" />} disabled={!ack} loading={working} onClick={() => void run()}>
             {t('de.button')}
           </Button>
         </>
       }
     >
-      <div className="space-y-4 text-[13px]">
-        <p className="text-fg2">{t('de.text')}</p>
-        <code className="block rounded-md border border-stroke bg-layer-solid px-3 py-2 font-mono text-[12px] break-all">{app.registryPath}</code>
+      <div className="stack-16 dialog-muted">
+        <p className="c-fg2">{t('de.text')}</p>
+        <code className="dialog-code dialog-code--boxed">{app.registryPath}</code>
         {(app.uninstallString || app.quietUninstallString) && (
-          <p className="flex items-start gap-2 text-xs text-warning">
-            <Info className="mt-px h-3.5 w-3.5 shrink-0" />
+          <p className="callout callout--plain callout--plain-warn">
+            <Info className="callout-icon--plain" />
             {t('de.warning')}
           </p>
         )}
-        <p className="flex items-start gap-2 text-xs text-fg2">
-          <ShieldCheck className="mt-px h-3.5 w-3.5 shrink-0 text-success" />
-          {t('de.backupNote')} <span className="font-mono">{settings.backupDirectory}</span>
+        <p className="callout callout--plain">
+          <ShieldCheck className="callout-icon--plain callout-icon--success" />
+          {t('de.backupNote')} <span className="mono">{settings.backupDirectory}</span>
         </p>
         <Checkbox checked={ack} onChange={setAck} label={t('de.ack')} />
       </div>
@@ -89,12 +89,12 @@ export function ErrorDialog({ title, error }: { title?: string; error: AppError 
   return (
     <Modal
       title={title ?? t('err.title')}
-      icon={<AlertOctagon className="h-5 w-5 text-danger" />}
+      icon={<AlertOctagon className="i20 c-danger" />}
       onClose={closeDialog}
       size="sm"
       footer={
         <>
-          <Button icon={<ClipboardCopy className="h-3.5 w-3.5" />} onClick={() => void copyText(text).then((ok) => pushToast(ok ? 'success' : 'error', t(ok ? 'copied' : 'copyFailed')))}>
+          <Button icon={<ClipboardCopy className="i14" />} onClick={() => void copyText(text).then((ok) => pushToast(ok ? 'success' : 'error', t(ok ? 'copied' : 'copyFailed')))}>
             {t('err.copy')}
           </Button>
           <Button variant="primary" onClick={closeDialog}>
@@ -103,15 +103,15 @@ export function ErrorDialog({ title, error }: { title?: string; error: AppError 
         </>
       }
     >
-      <div className="space-y-3 text-[13px]">
-        <div className="flex items-start gap-2">
+      <div className="stack-12 dialog-muted">
+        <div className="dialog-error-code">
           <Badge tone="red">{error.code}</Badge>
           <span className="break-words">{error.message}</span>
         </div>
         {error.details && (
           <div>
-            <div className="mb-1 text-[11px] font-semibold tracking-wider text-fg3 uppercase">{t('err.details')}</div>
-            <pre className="max-h-48 overflow-auto rounded-md bg-console p-2 font-mono text-[11px] whitespace-pre-wrap text-console-fg">{error.details}</pre>
+            <div className="section-title section-title--sub">{t('err.details')}</div>
+            <pre className="dialog-console">{error.details}</pre>
           </div>
         )}
       </div>
@@ -137,7 +137,7 @@ export function PropertiesDialog({ appId }: { appId: string }) {
       size="lg"
       footer={
         <>
-          <Button icon={<ClipboardCopy className="h-3.5 w-3.5" />} onClick={() => void copyText(formatAppInfo(detail ?? app, t)).then((ok) => pushToast(ok ? 'success' : 'error', t(ok ? 'copied' : 'copyFailed')))}>
+          <Button icon={<ClipboardCopy className="i14" />} onClick={() => void copyText(formatAppInfo(detail ?? app, t)).then((ok) => pushToast(ok ? 'success' : 'error', t(ok ? 'copied' : 'copyFailed')))}>
             {t('detail.copyAll')}
           </Button>
           <Button variant="primary" onClick={closeDialog}>
@@ -177,14 +177,14 @@ export function LogsDialog() {
   return (
     <Modal
       title={t('lg.title')}
-      icon={<ScrollText className="h-5 w-5 text-accent" />}
+      icon={<ScrollText className="i20 c-accent" />}
       onClose={closeDialog}
       size="lg"
       footer={
         <>
-          <div className="mr-auto flex items-center gap-2 text-xs text-fg2">
+          <div className="log-filter">
             {t('lg.level')}
-            <Select value={level} onChange={(e) => setLevel(e.target.value as LogLevel)} className="h-7">
+            <Select value={level} onChange={(e) => setLevel(e.target.value as LogLevel)} className="select--sm">
               {LEVEL_ORDER.map((l) => (
                 <option key={l} value={l}>
                   {l}
@@ -193,7 +193,7 @@ export function LogsDialog() {
             </Select>
           </div>
           <Button onClick={clearLogs}>{t('lg.clear')}</Button>
-          <Button icon={<ClipboardCopy className="h-3.5 w-3.5" />} onClick={() => void copyText(text).then((ok) => pushToast(ok ? 'success' : 'error', t(ok ? 'copied' : 'copyFailed')))}>
+          <Button icon={<ClipboardCopy className="i14" />} onClick={() => void copyText(text).then((ok) => pushToast(ok ? 'success' : 'error', t(ok ? 'copied' : 'copyFailed')))}>
             {t('lg.copy')}
           </Button>
           <Button variant="primary" onClick={closeDialog}>
@@ -203,16 +203,16 @@ export function LogsDialog() {
       }
     >
       {shown.length === 0 ? (
-        <p className="py-8 text-center text-sm text-fg2">{t('lg.empty')}</p>
+        <p className="empty-note">{t('lg.empty')}</p>
       ) : (
-        <ul className="space-y-0.5 font-mono text-[11.5px]">
+        <ul className="log-list stack-2">
           {shown.map((e, m) => (
-            <li key={m} className="flex items-start gap-2 rounded px-1 py-0.5 odd:bg-layer-solid">
-              <span className="shrink-0 text-fg3 tabular-nums">{formatTime(e.ts)}</span>
-              <Badge tone={LEVEL_TONE[e.level]} className="w-12 shrink-0 justify-center">
+            <li key={m} className="log-entry">
+              <span className="log-time">{formatTime(e.ts)}</span>
+              <Badge tone={LEVEL_TONE[e.level]} className="badge--log">
                 {e.level}
               </Badge>
-              <span className="break-all text-fg">{e.message}</span>
+              <span className="log-message">{e.message}</span>
             </li>
           ))}
         </ul>
@@ -257,7 +257,7 @@ export function BackupsDialog() {
   return (
     <Modal
       title={t('bk.title')}
-      icon={<Archive className="h-5 w-5 text-accent" />}
+      icon={<Archive className="i20 c-accent" />}
       onClose={closeDialog}
       size="lg"
       footer={
@@ -267,40 +267,40 @@ export function BackupsDialog() {
       }
     >
       {!backups ? (
-        <p className="py-8 text-center text-sm text-fg2">{t('loading')}</p>
+        <p className="empty-note">{t('loading')}</p>
       ) : backups.length === 0 ? (
-        <p className="py-8 text-center text-sm text-fg2">{t('bk.empty')}</p>
+        <p className="empty-note">{t('bk.empty')}</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="backup-list stack-8">
           {backups.map((b) => (
-            <li key={b.id} className={cn('rounded-lg border border-stroke p-3', !b.restorable && 'opacity-60')}>
-              <div className="flex items-start gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-[13px] font-medium">{b.appName}</span>
+            <li key={b.id} className={cn('backup-item', !b.restorable && 'is-locked')}>
+              <div className="backup-row">
+                <div className="backup-body">
+                  <div className="backup-title-row">
+                    <span className="backup-name">{b.appName}</span>
                     <Badge tone={b.kind === 'registry' ? 'sky' : 'amber'}>{t(b.kind === 'registry' ? 'bk.kind.registry' : 'bk.kind.leftovers')}</Badge>
                     {!b.restorable && <Badge>{t('bk.notRestorable')}</Badge>}
                   </div>
-                  <div className="mt-0.5 text-xs text-fg2">
+                  <div className="backup-meta">
                     {formatDateTime(b.createdAt)} · {t('bk.keys')}: {b.keys.length}
                   </div>
-                  <div className="mt-1 font-mono text-[11px] break-all text-fg2">{b.path}</div>
+                  <div className="backup-path">{b.path}</div>
                   {b.keys.length > 0 && (
-                    <ul className="mt-1 space-y-0.5 font-mono text-[11px] text-fg2">
+                    <ul className="backup-keys stack-2">
                       {b.keys.slice(0, 4).map((k) => (
-                        <li key={k} className="truncate">
+                        <li key={k} className="backup-key">
                           {k}
                         </li>
                       ))}
-                      {b.keys.length > 4 && <li className="text-fg3">… +{b.keys.length - 4}</li>}
+                      {b.keys.length > 4 && <li className="backup-keys-more">… +{b.keys.length - 4}</li>}
                     </ul>
                   )}
                 </div>
-                <div className="shrink-0">
+                <div className="backup-actions">
                   {confirmId === b.id ? (
-                    <div className="flex flex-col items-end gap-1.5">
-                      <span className="max-w-[200px] text-right text-[11px] text-fg2">{t('bk.confirmRestore')}</span>
-                      <div className="flex gap-1.5">
+                    <div className="backup-confirm">
+                      <span className="backup-confirm-text">{t('bk.confirmRestore')}</span>
+                      <div className="backup-confirm-actions">
                         <Button size="sm" onClick={() => setConfirmId(undefined)}>
                           {t('cancel')}
                         </Button>
@@ -310,7 +310,7 @@ export function BackupsDialog() {
                       </div>
                     </div>
                   ) : (
-                    <Button size="sm" icon={<RotateCcw className="h-3.5 w-3.5" />} disabled={!b.restorable} onClick={() => setConfirmId(b.id)}>
+                    <Button size="sm" icon={<RotateCcw className="i14" />} disabled={!b.restorable} onClick={() => setConfirmId(b.id)}>
                       {t('bk.restore')}
                     </Button>
                   )}

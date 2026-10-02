@@ -134,17 +134,17 @@ export function LeftoverDialog({ appId, appName, mode }: Props) {
   const footer =
     status === 'ready' ? (
       <>
-        <span className="mr-auto text-xs text-fg2">{selectedItems.length > 0 && formatBytes(selectedItems.reduce((s, m) => s + (m.sizeBytes ?? 0), 0))}</span>
+        <span className="lo-footer-size">{selectedItems.length > 0 && formatBytes(selectedItems.reduce((s, m) => s + (m.sizeBytes ?? 0), 0))}</span>
         <Button onClick={() => setScanToken((n) => n + 1)}>{t('lo.retryScan')}</Button>
         <Button onClick={closeDialog}>{t('cancel')}</Button>
-        <Button variant="danger" icon={<Eraser className="h-3.5 w-3.5" />} disabled={selected.size === 0} onClick={() => setStatus('confirm')}>
+        <Button variant="danger" icon={<Eraser className="i14" />} disabled={selected.size === 0} onClick={() => setStatus('confirm')}>
           {t('lo.deleteSelected', { count: selected.size })}
         </Button>
       </>
     ) : status === 'confirm' ? (
       <>
         <Button onClick={closeDialog}>{t('cancel')}</Button>
-        <Button variant="danger" icon={<Eraser className="h-3.5 w-3.5" />} onClick={() => void doDelete()}>
+        <Button variant="danger" icon={<Eraser className="i14" />} onClick={() => void doDelete()}>
           {t('confirm')}
         </Button>
       </>
@@ -155,28 +155,28 @@ export function LeftoverDialog({ appId, appName, mode }: Props) {
     ) : undefined;
 
   return (
-    <Modal title={title} icon={<Eraser className="h-5 w-5 text-danger" />} onClose={closeDialog} busy={busy} size="xl" footer={footer} bodyClassName="bg-app">
-      {status === 'disabled' && <p className="text-sm text-fg2">{t('lo.disabledByPolicy')}</p>}
+    <Modal title={title} icon={<Eraser className="i20 c-danger" />} onClose={closeDialog} busy={busy} size="xl" footer={footer} bodyClassName="dialog-body--app">
+      {status === 'disabled' && <p className="t-sm c-fg2">{t('lo.disabledByPolicy')}</p>}
 
       {status === 'scanning' && (
-        <div className="py-6">
-          <div className="flex items-center gap-3">
-            <Spinner className="h-6 w-6" />
+        <div className="lo-block">
+          <div className="lo-head-row">
+            <Spinner className="spinner--lg" />
             <div>
-              <div className="font-medium">{t('lo.scanning')}</div>
-              <div className="text-xs text-fg2">{progress ? `${t(`lo.phase.${progress.phase}` as TKey)} · ${progress.found}` : '…'}</div>
+              <div className="lo-head-title">{t('lo.scanning')}</div>
+              <div className="lo-head-desc">{progress ? `${t(`lo.phase.${progress.phase}` as TKey)} · ${progress.found}` : '…'}</div>
             </div>
           </div>
-          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-subtle">
-            <div className="h-full rounded-full bg-accent transition-all duration-200" style={{ width: `${progress?.percent ?? 3}%` }} />
+          <div className="lo-track">
+            <div className="lo-fill" style={{ width: `${progress?.percent ?? 3}%` }} />
           </div>
-          <ol className="mt-4 grid grid-cols-4 gap-2 text-[11px]">
+          <ol className="lo-phases">
             {PHASES.map((p) => {
               const idx = progress ? PHASES.indexOf(progress.phase) : -1;
               const m = PHASES.indexOf(p);
               return (
-                <li key={p} className={cn('flex items-center gap-1.5 rounded-md border px-2 py-1.5', m < idx ? 'border-success/30 text-success' : m === idx ? 'border-accent text-accent' : 'border-stroke text-fg3')}>
-                  {m < idx ? <CheckCircle2 className="h-3 w-3" /> : m === idx ? <Spinner className="h-3 w-3" /> : <span className="h-3 w-3 rounded-full border border-current" />}
+                <li key={p} className={cn('lo-phase', m < idx ? 'lo-phase--done' : m === idx ? 'lo-phase--active' : 'lo-phase--idle')}>
+                  {m < idx ? <CheckCircle2 className="i12" /> : m === idx ? <Spinner className="spinner--sm" /> : <span className="lo-phase-dot" />}
                   {t(`lo.phase.${p}` as TKey)}
                 </li>
               );
@@ -186,44 +186,44 @@ export function LeftoverDialog({ appId, appName, mode }: Props) {
       )}
 
       {(status === 'ready' || status === 'confirm' || status === 'deleting') && result && (
-        <div className="space-y-3">
+        <div className="stack-12">
           {mode === 'force' && (
-            <div className="flex items-start gap-2 rounded-md border border-info/30 bg-info-soft px-3 py-2 text-xs text-info">
-              <ShieldCheck className="mt-px h-3.5 w-3.5 shrink-0" />
+            <div className="callout callout--info">
+              <ShieldCheck className="callout-icon" />
               {t('lo.previewOnly')}
             </div>
           )}
 
           {result.items.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-10 text-center">
-              <Sparkles className="h-8 w-8 text-success" />
-              <div className="text-sm font-medium">{t('lo.none')}</div>
+            <div className="lo-empty">
+              <Sparkles className="i32 c-success" />
+              <div className="lo-empty-title">{t('lo.none')}</div>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-[13px] font-medium">{t('lo.found', { count: result.items.length, locations: result.scannedLocations, size: formatBytes(totalSize) })}</div>
-                <div className="flex gap-2 text-xs">
-                  <button type="button" className="text-accent hover:underline" onClick={() => toggleGroup(result.items, true)}>
+              <div className="lo-summary-row">
+                <div className="lo-summary-text">{t('lo.found', { count: result.items.length, locations: result.scannedLocations, size: formatBytes(totalSize) })}</div>
+                <div className="export-fields-actions">
+                  <button type="button" className="link-accent" onClick={() => toggleGroup(result.items, true)}>
                     {t('selectAll')}
                   </button>
-                  <button type="button" className="text-fg2 hover:underline" onClick={() => setSelected(new Set())}>
+                  <button type="button" className="link-muted" onClick={() => setSelected(new Set())}>
                     {t('clearSelection')}
                   </button>
                 </div>
               </div>
 
               {status === 'confirm' && (
-                <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-soft px-3 py-2.5 text-[13px] text-danger">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <div className="callout callout--danger callout--lg">
+                  <AlertTriangle className="callout-icon--lg" />
                   <div>
-                    <div className="font-semibold">{t('lo.confirmTitle')}</div>
-                    <div className="text-xs">{t('lo.confirmText', { files: selectedFiles, keys: selectedKeys })}</div>
+                    <div className="callout-title">{t('lo.confirmTitle')}</div>
+                    <div className="callout-text">{t('lo.confirmText', { files: selectedFiles, keys: selectedKeys })}</div>
                   </div>
                 </div>
               )}
 
-              <div className={cn('space-y-2', status === 'deleting' && 'pointer-events-none opacity-60')}>
+              <div className={cn('stack-8', 'lo-groups', status === 'deleting' && 'is-busy')}>
                 {GROUPS.map(({ key, label, icon: Icon }) => {
                   const items = grouped.get(key);
                   if (!items || items.length === 0) return null;
@@ -231,26 +231,26 @@ export function LeftoverDialog({ appId, appName, mode }: Props) {
                   const selectedCount = selectable.filter((m) => selected.has(m.id)).length;
                   const groupSize = items.reduce((s, m) => s + (m.sizeBytes ?? 0), 0);
                   return (
-                    <div key={key} className="overflow-hidden rounded-lg border border-stroke bg-layer-solid">
-                      <div className="flex items-center gap-2 border-b border-stroke bg-layer-solid px-3 py-1.5">
+                    <div key={key} className="lo-group">
+                      <div className="lo-group-head">
                         <Checkbox checked={selectedCount > 0 && selectedCount === selectable.length} indeterminate={selectedCount > 0 && selectedCount < selectable.length} onChange={(on) => toggleGroup(items, on)} disabled={selectable.length === 0} />
-                        <Icon className="h-4 w-4 text-fg2" />
-                        <span className="text-[13px] font-medium">{t(label)}</span>
-                        <span className="text-xs text-fg3">{items.length}</span>
-                        {groupSize > 0 && <span className="ml-auto text-xs text-fg3 tabular-nums">{formatBytes(groupSize)}</span>}
+                        <Icon className="i16 c-fg2" />
+                        <span className="lo-group-name">{t(label)}</span>
+                        <span className="lo-group-count">{items.length}</span>
+                        {groupSize > 0 && <span className="lo-group-size">{formatBytes(groupSize)}</span>}
                       </div>
                       <ul>
                         {items.map((item) => (
-                          <li key={item.id} className={cn('flex items-start gap-2 px-3 py-1.5 text-[12.5px] odd:bg-layer-solid/50', item.risk === 'protected' && 'opacity-60')}>
-                            <Checkbox checked={selected.has(item.id)} onChange={(on) => toggle(item.id, on)} disabled={item.risk === 'protected'} className="mt-px" />
-                            <div className="min-w-0 flex-1">
-                              <div className="font-mono break-all text-fg">{item.path}</div>
-                              <div className="text-[11px] text-fg3">
+                          <li key={item.id} className={cn('lo-item', item.risk === 'protected' && 'is-protected')}>
+                            <Checkbox checked={selected.has(item.id)} onChange={(on) => toggle(item.id, on)} disabled={item.risk === 'protected'} className="checkbox--tight" />
+                            <div className="lo-item-body">
+                              <div className="lo-item-path">{item.path}</div>
+                              <div className="lo-item-reason">
                                 {t('lo.reason')}: {t(`reason.${item.reason}` as TKey)}
                               </div>
                             </div>
-                            <div className="flex shrink-0 items-center gap-2">
-                              {item.sizeBytes !== undefined && <span className="text-xs text-fg3 tabular-nums">{formatBytes(item.sizeBytes)}</span>}
+                            <div className="lo-item-side">
+                              {item.sizeBytes !== undefined && <span className="lo-item-size">{formatBytes(item.sizeBytes)}</span>}
                               <Badge tone={item.risk === 'safe' ? 'green' : item.risk === 'caution' ? 'amber' : 'red'}>{t(`lo.risk.${item.risk}` as TKey)}</Badge>
                             </div>
                           </li>
@@ -261,8 +261,8 @@ export function LeftoverDialog({ appId, appName, mode }: Props) {
                 })}
               </div>
 
-              <div className="flex items-start gap-2 text-[11px] text-fg2">
-                <ShieldCheck className="mt-px h-3.5 w-3.5 shrink-0 text-success" />
+              <div className="callout callout--plain callout--plain-sm">
+                <ShieldCheck className="callout-icon--plain callout-icon--success" />
                 {t('lo.protectNote')}
               </div>
             </>
@@ -271,12 +271,12 @@ export function LeftoverDialog({ appId, appName, mode }: Props) {
       )}
 
       {status === 'done' && deleteResult && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            {deleteResult.failed.length === 0 ? <CheckCircle2 className="h-8 w-8 text-success" /> : <AlertTriangle className="h-8 w-8 text-warning" />}
+        <div className="stack-16">
+          <div className="lo-done-row">
+            {deleteResult.failed.length === 0 ? <CheckCircle2 className="i32 c-success" /> : <AlertTriangle className="i32 c-warning" />}
             <div>
-              <div className="font-semibold">{t('lo.doneTitle')}</div>
-              <div className="text-xs text-fg2">
+              <div className="lo-done-title">{t('lo.doneTitle')}</div>
+              <div className="lo-done-desc">
                 {[
                   t('lo.deleted', { count: deleteResult.deleted.length }),
                   deleteResult.recycled > 0 ? t('lo.recycled', { count: deleteResult.recycled }) : undefined,
@@ -288,19 +288,19 @@ export function LeftoverDialog({ appId, appName, mode }: Props) {
             </div>
           </div>
           {deleteResult.backup && (
-            <div className="rounded-md border border-stroke bg-layer-solid px-3 py-2 text-xs">
-              <div className="text-fg2">{t('lo.backupSaved')}</div>
-              <div className="mt-0.5 font-mono break-all text-fg">{deleteResult.backup.path}</div>
+            <div className="dialog-card-box">
+              <div className="c-fg2">{t('lo.backupSaved')}</div>
+              <div className="dialog-card-box-mono">{deleteResult.backup.path}</div>
             </div>
           )}
           {deleteResult.failed.length > 0 && (
-            <ul className="space-y-1 rounded-md border border-danger/30 bg-danger-soft p-2 text-xs">
+            <ul className="lo-failed-list stack-4">
               {deleteResult.failed.map((f) => (
-                <li key={f.id} className="flex items-start gap-2 text-danger">
-                  <XCircle className="mt-px h-3.5 w-3.5 shrink-0" />
-                  <div className="min-w-0">
-                    <div className="font-mono break-all">{f.path}</div>
-                    <div className="opacity-80">{f.reason}</div>
+                <li key={f.id} className="lo-failed-item">
+                  <XCircle className="lo-failed-icon" />
+                  <div className="lo-failed-body">
+                    <div className="lo-failed-path">{f.path}</div>
+                    <div className="lo-failed-reason">{f.reason}</div>
                   </div>
                 </li>
               ))}

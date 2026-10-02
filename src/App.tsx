@@ -75,24 +75,19 @@ export default function App() {
 
   return (
     <div
-      className="flex h-screen w-screen flex-col overflow-hidden bg-app text-fg antialiased"
+      className="app-shell"
       onContextMenu={(e) => {
         // Only table rows open the app menu; suppress the browser menu elsewhere for a native feel.
         if (!(e.target as HTMLElement).closest('input, textarea, a, [data-native-menu]')) e.preventDefault();
       }}
     >
       <Toolbar />
-      <div className="flex min-h-0 flex-1">
+      <div className="app-body">
         <Sidebar />
-        <main className="flex min-w-0 flex-1 flex-col">
+        <main className="app-main">
           <AppTable />
         </main>
-        <aside
-          className={cn(
-            'hidden shrink-0 border-l border-stroke bg-card transition-[width] duration-200 lg:block',
-            detailOpen ? 'w-[340px] xl:w-[380px]' : 'w-0 overflow-hidden border-l-0',
-          )}
-        >
+        <aside className={cn('detail-aside', detailOpen ? 'detail-aside--open' : 'detail-aside--closed')}>
           {detailOpen && <DetailPanel />}
         </aside>
       </div>

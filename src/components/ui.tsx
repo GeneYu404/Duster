@@ -15,11 +15,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClass: Record<Variant, string> = {
-  primary: 'bg-accent text-on-accent hover:bg-accent-hover active:opacity-90 border-transparent',
-  danger: 'bg-danger-solid text-white hover:bg-danger-solid-hover active:opacity-90 border-transparent',
-  default: 'bg-card text-fg border-stroke hover:bg-card-hover active:bg-subtle-press shadow-sm',
-  ghost: 'bg-transparent border-transparent text-fg2 hover:bg-subtle active:bg-subtle-press',
-  subtle: 'bg-subtle border-transparent text-fg hover:bg-subtle-press',
+  primary: 'btn--primary',
+  danger: 'btn--danger',
+  default: 'btn--default',
+  ghost: 'btn--ghost',
+  subtle: 'btn--subtle',
 };
 
 export function Button({ variant = 'default', size = 'md', loading, icon, className, children, disabled, ...rest }: ButtonProps) {
@@ -27,15 +27,10 @@ export function Button({ variant = 'default', size = 'md', loading, icon, classN
     <button
       type="button"
       disabled={disabled || loading}
-      className={cn(
-        'inline-flex items-center justify-center gap-1.5 rounded-md border font-medium transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-40',
-        size === 'sm' ? 'h-7 px-2.5 text-xs' : 'h-8 px-3 text-[13px]',
-        variantClass[variant],
-        className,
-      )}
+      className={cn('btn t-colors', size === 'sm' ? 'btn--sm' : 'btn--md', variantClass[variant], className)}
       {...rest}
     >
-      {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : icon}
+      {loading ? <Loader2 className="btn-spinner" /> : icon}
       {children}
     </button>
   );
@@ -52,11 +47,7 @@ export function IconButton({ label, active, className, children, ...rest }: Icon
       type="button"
       title={label}
       aria-label={label}
-      className={cn(
-        'inline-flex h-8 w-8 items-center justify-center rounded-md text-fg2 transition-colors hover:bg-subtle hover:text-fg focus:outline-none disabled:opacity-40',
-        active && 'bg-accent-soft text-accent',
-        className,
-      )}
+      className={cn('icon-btn t-colors', className, active && 'icon-btn--on')}
       {...rest}
     >
       {children}
@@ -78,7 +69,7 @@ interface CheckboxProps {
 
 export function Checkbox({ checked, indeterminate, onChange, disabled, label, description, className }: CheckboxProps) {
   return (
-    <label className={cn('flex cursor-pointer items-start gap-2.5 text-[13px]', disabled && 'cursor-not-allowed opacity-50', className)}>
+    <label className={cn('checkbox', disabled && 'is-disabled', className)}>
       <span
         role="checkbox"
         aria-checked={indeterminate ? 'mixed' : checked}
@@ -94,17 +85,14 @@ export function Checkbox({ checked, indeterminate, onChange, disabled, label, de
           e.preventDefault();
           if (!disabled) onChange?.(!checked);
         }}
-        className={cn(
-          'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors focus:outline-none',
-          checked || indeterminate ? 'border-accent bg-accent text-on-accent' : 'border-fg2 bg-card',
-        )}
+        className={cn('checkbox-box t-colors', checked || indeterminate ? 'checkbox-box--on' : 'checkbox-box--off')}
       >
-        {indeterminate ? <Minus className="h-3 w-3" strokeWidth={3} /> : checked ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
+        {indeterminate ? <Minus className="i12" strokeWidth={3} /> : checked ? <Check className="i12" strokeWidth={3} /> : null}
       </span>
       {(label || description) && (
-        <span className="min-w-0 select-none" onClick={(e) => { e.preventDefault(); if (!disabled) onChange?.(!checked); }}>
-          {label && <span className="block text-fg">{label}</span>}
-          {description && <span className="block text-xs text-fg2">{description}</span>}
+        <span className="checkbox-text" onClick={(e) => { e.preventDefault(); if (!disabled) onChange?.(!checked); }}>
+          {label && <span className="checkbox-label">{label}</span>}
+          {description && <span className="checkbox-desc">{description}</span>}
         </span>
       )}
     </label>
@@ -123,10 +111,10 @@ interface ToggleProps {
 
 export function Toggle({ checked, onChange, disabled, label, description }: ToggleProps) {
   return (
-    <div className={cn('flex items-center justify-between gap-4 py-2', disabled && 'opacity-60')}>
-      <div className="min-w-0">
-        <div className="text-[13px] text-fg">{label}</div>
-        {description && <div className="text-xs text-fg2">{description}</div>}
+    <div className={cn('toggle-row', disabled && 'is-disabled')}>
+      <div className="toggle-text">
+        <div className="toggle-label">{label}</div>
+        {description && <div className="toggle-desc">{description}</div>}
       </div>
       <button
         type="button"
@@ -134,17 +122,9 @@ export function Toggle({ checked, onChange, disabled, label, description }: Togg
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={cn(
-          'relative h-5 w-9 shrink-0 rounded-full border transition-colors focus:outline-none disabled:cursor-not-allowed',
-          checked ? 'border-transparent bg-accent' : 'border-fg2 bg-transparent hover:bg-subtle',
-        )}
+        className={cn('toggle t-colors', checked ? 'toggle--on' : 'toggle--off')}
       >
-        <span
-          className={cn(
-            'absolute top-0.5 left-0.5 h-4 w-4 rounded-full shadow transition-transform',
-            checked ? 'translate-x-4 bg-on-accent' : 'bg-fg2',
-          )}
-        />
+        <span className={cn('toggle-thumb t-transform', checked ? 'toggle-thumb--on' : 'toggle-thumb--off')} />
       </button>
     </div>
   );
@@ -161,16 +141,13 @@ interface SegmentedProps<T extends string> {
 
 export function Segmented<T extends string>({ value, options, onChange, className }: SegmentedProps<T>) {
   return (
-    <div className={cn('inline-flex rounded-md border border-stroke bg-card p-0.5', className)}>
+    <div className={cn('segmented', className)}>
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
-          className={cn(
-            'rounded px-3 py-1 text-xs font-medium transition-colors',
-            value === o.value ? 'bg-accent text-on-accent' : 'text-fg2 hover:bg-subtle hover:text-fg',
-          )}
+          className={cn('seg-item t-colors', value === o.value ? 'seg-item--on' : 'seg-item--off')}
         >
           {o.label}
         </button>
@@ -183,13 +160,7 @@ export function Segmented<T extends string>({ value, options, onChange, classNam
 
 export function Select({ className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select
-      className={cn(
-        'h-8 rounded-md border border-stroke bg-card px-2 text-[13px] text-fg hover:bg-card-hover focus:outline-none',
-        className,
-      )}
-      {...rest}
-    >
+    <select className={cn('select', className)} {...rest}>
       {children}
     </select>
   );
@@ -200,22 +171,18 @@ export function Select({ className, children, ...rest }: SelectHTMLAttributes<HT
 type Tone = 'neutral' | 'indigo' | 'green' | 'amber' | 'red' | 'sky' | 'violet' | 'pink';
 
 const toneClass: Record<Tone, string> = {
-  neutral: 'bg-subtle text-fg2',
-  indigo: 'bg-accent-soft text-accent',
-  green: 'bg-success-soft text-success',
-  amber: 'bg-warning-soft text-warning',
-  red: 'bg-danger-soft text-danger',
-  sky: 'bg-info-soft text-info',
-  violet: 'bg-brand-soft text-brand',
-  pink: 'bg-game-soft text-game',
+  neutral: 'badge--neutral',
+  indigo: 'badge--indigo',
+  green: 'badge--green',
+  amber: 'badge--amber',
+  red: 'badge--red',
+  sky: 'badge--sky',
+  violet: 'badge--violet',
+  pink: 'badge--pink',
 };
 
 export function Badge({ tone = 'neutral', className, children }: { tone?: Tone; className?: string; children: ReactNode }) {
-  return (
-    <span className={cn('inline-flex items-center rounded px-1.5 py-px text-[10px] font-semibold tracking-wide uppercase', toneClass[tone], className)}>
-      {children}
-    </span>
-  );
+  return <span className={cn('badge', toneClass[tone], className)}>{children}</span>;
 }
 
 export const KIND_TONE: Record<string, Tone> = {
@@ -230,7 +197,7 @@ export const KIND_TONE: Record<string, Tone> = {
 /* ---------------------------------- Spinner -------------------------------- */
 
 export function Spinner({ className }: { className?: string }) {
-  return <Loader2 className={cn('h-4 w-4 animate-spin text-accent', className)} />;
+  return <Loader2 className={cn('spinner', className)} />;
 }
 
 /* ----------------------------------- Modal --------------------------------- */
@@ -248,7 +215,7 @@ interface ModalProps {
   bodyClassName?: string;
 }
 
-const sizeClass = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
+const sizeClass = { sm: 'dialog--sm', md: 'dialog--md', lg: 'dialog--lg', xl: 'dialog--xl' };
 
 export function Modal({ title, subtitle, icon, children, footer, onClose, size = 'md', busy, bodyClassName }: ModalProps) {
   useEffect(() => {
@@ -264,31 +231,24 @@ export function Modal({ title, subtitle, icon, children, footer, onClose, size =
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 p-4 backdrop-blur-[2px] animate-in"
+      className="modal-overlay animate-in"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !busy) onClose();
       }}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        className={cn(
-          'flex w-full flex-col overflow-hidden rounded-xl border border-stroke bg-dialog text-fg shadow-dialog max-h-[90vh]',
-          sizeClass[size],
-        )}
-      >
-        <div className="flex items-start gap-3 border-b border-stroke px-5 py-3.5">
-          {icon && <div className="mt-0.5 shrink-0">{icon}</div>}
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-[15px] font-semibold">{title}</h2>
-            {subtitle && <div className="mt-0.5 truncate text-xs text-fg2">{subtitle}</div>}
+      <div role="dialog" aria-modal="true" className={cn('dialog', sizeClass[size])}>
+        <div className="dialog-head">
+          {icon && <div className="dialog-icon">{icon}</div>}
+          <div className="dialog-head-body">
+            <h2 className="dialog-title">{title}</h2>
+            {subtitle && <div className="dialog-subtitle">{subtitle}</div>}
           </div>
-          <IconButton label="Close" onClick={onClose} disabled={busy} className="-mr-2 h-7 w-7">
-            <X className="h-4 w-4" />
+          <IconButton label="Close" onClick={onClose} disabled={busy} className="icon-btn--dialog">
+            <X className="i16" />
           </IconButton>
         </div>
-        <div className={cn('win-scroll min-h-0 flex-1 overflow-auto px-5 py-4', bodyClassName)}>{children}</div>
-        {footer && <div className="flex items-center justify-end gap-2 border-t border-stroke bg-dialog-footer px-5 py-3">{footer}</div>}
+        <div className={cn('win-scroll dialog-body', bodyClassName)}>{children}</div>
+        {footer && <div className="dialog-foot">{footer}</div>}
       </div>
     </div>
   );
@@ -298,21 +258,19 @@ export function Modal({ title, subtitle, icon, children, footer, onClose, size =
 
 export function Field({ label, children, mono, className }: { label: ReactNode; children: ReactNode; mono?: boolean; className?: string }) {
   return (
-    <div className={cn('grid grid-cols-[112px_1fr] items-start gap-x-3 gap-y-0.5 py-1.5 text-[13px]', className)}>
-      <div className="pt-px text-xs text-fg2">{label}</div>
-      <div className={cn('min-w-0 break-all text-fg', mono && 'font-mono text-[12px]')}>{children}</div>
+    <div className={cn('field', className)}>
+      <div className="field-label">{label}</div>
+      <div className={cn('field-value', mono && 'field-value--mono')}>{children}</div>
     </div>
   );
 }
 
 export function SectionTitle({ children }: { children: ReactNode }) {
-  return <h3 className="mt-4 mb-1 text-[11px] font-semibold tracking-wider text-fg3 uppercase first:mt-0">{children}</h3>;
+  return <h3 className="section-title section-title--dialog">{children}</h3>;
 }
 
 /* ----------------------------------- Kbd ----------------------------------- */
 
 export function Kbd({ children }: { children: ReactNode }) {
-  return (
-    <kbd className="rounded border border-stroke bg-subtle px-1 font-sans text-[10px] text-fg2">{children}</kbd>
-  );
+  return <kbd className="kbd-inline">{children}</kbd>;
 }

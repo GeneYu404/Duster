@@ -7,20 +7,16 @@ export function Toasts() {
   const dismiss = useAppStore((s) => s.dismissToast);
   if (toasts.length === 0) return null;
   return (
-    <div className="pointer-events-none fixed right-4 bottom-10 z-[60] flex w-80 flex-col gap-2">
+    <div className="toast-stack">
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={cn(
-            'pointer-events-auto flex items-start gap-2.5 rounded-lg border border-stroke bg-acrylic px-3 py-2.5 text-[13px] text-fg shadow-flyout backdrop-blur-2xl animate-in',
-            t.kind === 'success' && 'border-success/30',
-            t.kind === 'error' && 'border-danger/30',
-          )}
+          className={cn('toast animate-in', t.kind === 'success' && 'toast--success', t.kind === 'error' && 'toast--error')}
         >
-          {t.kind === 'success' ? <CheckCircle2 className="mt-px h-4 w-4 shrink-0 text-success" /> : t.kind === 'error' ? <AlertCircle className="mt-px h-4 w-4 shrink-0 text-danger" /> : <Info className="mt-px h-4 w-4 shrink-0 text-accent" />}
-          <span className="min-w-0 flex-1 break-words">{t.message}</span>
-          <button type="button" onClick={() => dismiss(t.id)} className="shrink-0 rounded p-0.5 text-fg2 opacity-60 hover:bg-subtle hover:opacity-100">
-            <X className="h-3.5 w-3.5" />
+          {t.kind === 'success' ? <CheckCircle2 className="toast-icon i16 c-success" /> : t.kind === 'error' ? <AlertCircle className="toast-icon i16 c-danger" /> : <Info className="toast-icon i16 c-accent" />}
+          <span className="toast-msg">{t.message}</span>
+          <button type="button" onClick={() => dismiss(t.id)} className="toast-close">
+            <X className="i14" />
           </button>
         </div>
       ))}

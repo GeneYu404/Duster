@@ -108,18 +108,18 @@ export function UninstallDialog({ appIds, quiet: quietInitial }: Props) {
 
   const statusIcon = (id: string) => {
     const r = results[id];
-    if (currentId === id) return <Loader2 className="h-4 w-4 animate-spin text-accent" />;
-    if (!r) return <Circle className="h-4 w-4 text-fg3" />;
-    if (r.success) return <CheckCircle2 className="h-4 w-4 text-success" />;
-    if (r.cancelled) return <AlertTriangle className="h-4 w-4 text-warning" />;
-    return <XCircle className="h-4 w-4 text-danger" />;
+    if (currentId === id) return <Loader2 className="i16 spin c-accent" />;
+    if (!r) return <Circle className="i16 c-fg3" />;
+    if (r.success) return <CheckCircle2 className="i16 c-success" />;
+    if (r.cancelled) return <AlertTriangle className="i16 c-warning" />;
+    return <XCircle className="i16 c-danger" />;
   };
 
   return (
     <Modal
       title={title}
       subtitle={single ? [single.version, single.publisher].filter(Boolean).join(' · ') : undefined}
-      icon={single ? <AppIcon appId={single.id} name={single.name} size={28} /> : <Trash2 className="h-6 w-6 text-danger" />}
+      icon={single ? <AppIcon appId={single.id} name={single.name} size={28} /> : <Trash2 className="i24 c-danger" />}
       onClose={closeDialog}
       busy={step === 'running'}
       size={single && step === 'confirm' ? 'md' : 'lg'}
@@ -127,16 +127,16 @@ export function UninstallDialog({ appIds, quiet: quietInitial }: Props) {
         step === 'confirm' ? (
           <>
             <Button onClick={closeDialog}>{t('cancel')}</Button>
-            <Button variant="primary" icon={<Trash2 className="h-3.5 w-3.5" />} onClick={() => void start()} disabled={apps.length === 0}>
+            <Button variant="primary" icon={<Trash2 className="i14" />} onClick={() => void start()} disabled={apps.length === 0}>
               {t('un.start')}
             </Button>
           </>
         ) : step === 'running' ? (
-          <span className="text-xs text-fg2">{t('un.elapsed', { time: formatDuration(elapsed) })}</span>
+          <span className="t-xs c-fg2">{t('un.elapsed', { time: formatDuration(elapsed) })}</span>
         ) : (
           <>
             {single && singleResult && !singleResult.success && (
-              <Button variant="danger" icon={<Eraser className="h-3.5 w-3.5" />} onClick={() => openDialog({ type: 'leftovers', appId: single.id, appName: single.name, mode: 'force' })}>
+              <Button variant="danger" icon={<Eraser className="i14" />} onClick={() => openDialog({ type: 'leftovers', appId: single.id, appName: single.name, mode: 'force' })}>
                 {t('un.forceNow')}
               </Button>
             )}
@@ -148,40 +148,40 @@ export function UninstallDialog({ appIds, quiet: quietInitial }: Props) {
       }
     >
       {step === 'confirm' && (
-        <div className="space-y-4">
-          <p className="text-[13px] text-fg2">{t('un.confirmText')}</p>
+        <div className="stack-16">
+          <p className="dialog-muted">{t('un.confirmText')}</p>
           {single ? (
-            <div className="rounded-lg border border-stroke bg-layer-solid p-3">
-              <div className="flex items-center gap-3">
+            <div className="dialog-card">
+              <div className="uninstall-app-row">
                 <AppIcon appId={single.id} name={single.name} size={36} />
                 <div className="min-w-0">
-                  <div className="truncate font-semibold">{single.name}</div>
-                  <div className="truncate text-xs text-fg2">{single.installLocation ?? single.registryPath}</div>
+                  <div className="uninstall-app-name">{single.name}</div>
+                  <div className="uninstall-app-path">{single.installLocation ?? single.registryPath}</div>
                 </div>
               </div>
-              <div className="mt-3 text-[11px] font-semibold tracking-wider text-fg3 uppercase">{t('un.command')}</div>
-              <code className="mt-1 block rounded bg-card px-2 py-1.5 font-mono text-[12px] break-all text-fg">
-                {command ?? <span className="text-warning">{t('un.noCommand')}</span>}
+              <div className="section-title section-title--top">{t('un.command')}</div>
+              <code className="dialog-code">
+                {command ?? <span className="c-warning">{t('un.noCommand')}</span>}
               </code>
             </div>
           ) : (
-            <ul className="max-h-56 space-y-1 overflow-auto rounded-lg border border-stroke p-2">
+            <ul className="uninstall-list">
               {apps.map((a) => (
-                <li key={a.id} className="flex items-center gap-2 text-[13px]">
+                <li key={a.id} className="uninstall-list-item">
                   <AppIcon appId={a.id} name={a.name} size={16} />
                   <span className="truncate">{a.name}</span>
-                  {!a.uninstallString && !a.quietUninstallString && <span className="ml-auto text-[11px] text-warning">{t('un.noCommand')}</span>}
+                  {!a.uninstallString && !a.quietUninstallString && <span className="uninstall-list-note">{t('un.noCommand')}</span>}
                 </li>
               ))}
             </ul>
           )}
-          <div className="space-y-2">
+          <div className="stack-8">
             <Checkbox checked={quiet} onChange={setQuiet} disabled={!quietAvailable} label={t('un.quiet')} description={!quietAvailable ? t('un.quietUnavailable') : undefined} />
             {single && <Checkbox checked={scanAfter} onChange={setScanAfter} disabled={!settings.enableLeftoverScan} label={t('un.scanAfter')} description={!settings.enableLeftoverScan ? t('lo.disabledByPolicy') : undefined} />}
           </div>
           {!isAdmin && (
-            <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-soft px-3 py-2 text-xs text-warning">
-              <ShieldAlert className="mt-px h-3.5 w-3.5 shrink-0" />
+            <div className="callout callout--warning">
+              <ShieldAlert className="callout-icon" />
               {t('un.uacNote')}
             </div>
           )}
@@ -189,20 +189,20 @@ export function UninstallDialog({ appIds, quiet: quietInitial }: Props) {
       )}
 
       {step !== 'confirm' && (
-        <div className="space-y-3">
+        <div className="stack-12">
           {single ? (
-            <div className="flex items-center gap-3">
+            <div className="uninstall-status-row">
               {step === 'running' ? (
-                <Loader2 className="h-8 w-8 animate-spin text-accent" />
+                <Loader2 className="i32 spin c-accent" />
               ) : singleResult?.success ? (
-                <CheckCircle2 className="h-8 w-8 text-success" />
+                <CheckCircle2 className="i32 c-success" />
               ) : singleResult?.cancelled ? (
-                <AlertTriangle className="h-8 w-8 text-warning" />
+                <AlertTriangle className="i32 c-warning" />
               ) : (
-                <XCircle className="h-8 w-8 text-danger" />
+                <XCircle className="i32 c-danger" />
               )}
               <div className="min-w-0">
-                <div className="font-semibold">
+                <div className="uninstall-status-title">
                   {step === 'running'
                     ? t('un.running', { name: single.name })
                     : singleResult?.success
@@ -211,7 +211,7 @@ export function UninstallDialog({ appIds, quiet: quietInitial }: Props) {
                         ? t('un.cancelled')
                         : t('un.failed')}
                 </div>
-                <div className="text-xs text-fg2">
+                <div className="uninstall-status-desc">
                   {step === 'running'
                     ? t('un.waiting')
                     : [
@@ -222,34 +222,34 @@ export function UninstallDialog({ appIds, quiet: quietInitial }: Props) {
                         .filter(Boolean)
                         .join(' · ')}
                 </div>
-                {singleResult?.rebootRequired && <div className="mt-0.5 text-xs text-warning">{t('un.rebootRequired')}</div>}
+                {singleResult?.rebootRequired && <div className="uninstall-reboot">{t('un.rebootRequired')}</div>}
               </div>
             </div>
           ) : (
             <div>
-              <ul className="max-h-48 space-y-1 overflow-auto rounded-lg border border-stroke p-2">
+              <ul className="uninstall-list uninstall-list--sm">
                 {apps.map((a) => (
-                  <li key={a.id} className={cn('flex items-center gap-2 text-[13px]', results[a.id] && !results[a.id].success && 'text-danger')}>
+                  <li key={a.id} className={cn('uninstall-list-item', results[a.id] && !results[a.id].success && 'is-failed')}>
                     {statusIcon(a.id)}
                     <span className="truncate">{a.name}</span>
-                    <span className="ml-auto shrink-0 text-[11px] text-fg3">
+                    <span className="uninstall-list-state">
                       {results[a.id] ? (results[a.id].success ? t('un.success') : results[a.id].message) : currentId === a.id ? t('un.waiting') : t('un.pending')}
                     </span>
                   </li>
                 ))}
               </ul>
-              {step === 'done' && <div className="mt-2 text-xs text-fg2">{t('un.summary', { ok: okCount, fail: failCount })}</div>}
+              {step === 'done' && <div className="uninstall-summary">{t('un.summary', { ok: okCount, fail: failCount })}</div>}
             </div>
           )}
           <div>
-            <div className="mb-1 text-[11px] font-semibold tracking-wider text-fg3 uppercase">{t('un.log')}</div>
-            <div ref={logRef} className="win-scroll h-40 overflow-auto rounded-md border border-stroke bg-console p-2 font-mono text-[11.5px] leading-relaxed text-console-fg">
+            <div className="section-title section-title--sub">{t('un.log')}</div>
+            <div ref={logRef} className="win-scroll uninstall-log">
               {lines.map((l, m) => (
-                <div key={m} className={cn('whitespace-pre-wrap', l.startsWith('✖') && 'text-danger', l.startsWith('━━') && 'mt-1 text-accent')}>
+                <div key={m} className={cn('log-line', l.startsWith('✖') && 'log-line--error', l.startsWith('━━') && 'log-line--head')}>
                   {l}
                 </div>
               ))}
-              {step === 'running' && <div className="animate-pulse text-fg2">▌</div>}
+              {step === 'running' && <div className="pulse log-caret">▌</div>}
             </div>
           </div>
         </div>
