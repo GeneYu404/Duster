@@ -7,7 +7,8 @@
 
 **Duster 拂尘** —— Windows 10/11 已安装软件管理 / 卸载 / 残留清理工具，
 对标 Geek Uninstaller / HiBit Uninstaller，代码、UI、文案、图标均为独立实现。
-Tauri 2 + Rust 后端，React 19 + TypeScript + Vite + Tailwind v4 前端。
+Tauri 2 + Rust 后端，React 19（跑在 **Preact 兼容层**上）+ TypeScript + Vite 前端，
+样式是**手写原生 CSS**（不再用 Tailwind，见 §8）。
 
 对外名称固定：**英文 `Duster`，中文「拂尘」**。改名不是改一处字符串，见 §4。
 
@@ -173,8 +174,10 @@ $big.Save("$env:TEMP\ico.png",'Png')           # 打开看，必须是新设计
 - ❌ `rm -rf` / `rmdir` / `mkdir` 这个路径，也不要手工删建来「清理」
 - ✅ 损坏时走 `mbx clean && mbx adopt`
 
-本项目**当前不是 git 仓库**（没有 `.git`）。将来 `git init` 时，`.gitignore` 里
-`src-tauri/target` 那条**不能带尾斜杠** —— 尾斜杠只匹配目录，而 git 看到的是 symlink，
+本项目**是 git 仓库**（2026-10-02 初始化，远端 `github.com/GeneYu404/Duster`，分支 `main`）。
+用户没明确要求就不要 commit / push。
+
+`.gitignore` 里 `src-tauri/target` 那条**不能带尾斜杠** —— 尾斜杠只匹配目录，而 git 看到的是 symlink，
 规则会静默失效，target 被当 `120000` 条目提交，克隆到别的机器就是指向 `D:\mbx\...` 的死链，
 **本地完全看不出来**。暂存后自查：`git ls-files -s | Select-String '120000'` 必须无输出。
 
@@ -193,15 +196,24 @@ $big.Save("$env:TEMP\ico.png",'Png')           # 打开看，必须是新设计
 配色与 lumina / PickScreen 共用同一套令牌，定义在 `src/index.css`。**组件里不写死色值**，
 只用语义类，明暗两套值由 CSS 变量提供，因此**组件里不允许出现 `dark:` 变体**。
 
-| 类别 | 类 | 用途 |
+| 类别 | 变量 | 用途 |
 | --- | --- | --- |
-| 表面 | `bg-app` `bg-layer` `bg-layer-solid` `bg-card` `bg-card-hover` `bg-acrylic` `bg-dialog` `bg-dialog-footer` | 窗口底 / 侧栏表头 / 卡片 / 弹层 / 对话框 |
-| 描边 | `border-stroke` `border-stroke-strong` | 分隔线、控件边框 |
-| 文字 | `text-fg` `text-fg2` `text-fg3` `text-on-accent` `text-console-fg` | 主/次/三级文字 |
-| 悬停 | `bg-subtle` `bg-subtle-press` | hover / active 反馈面 |
-| 强调 | `bg-accent` `text-accent` `bg-accent-soft` `bg-accent-hover` `accent-accent` | 主按钮、选中态、单选 |
-| 功能色 | `text-/bg-` + `success` `warning` `danger` `info` `brand` `game`（各带 `-soft` 变体） | 状态提示、软件类型徽标、危险操作 |
-| 投影 | `shadow-flyout` `shadow-dialog` | 浮出菜单 / 对话框 |
+| 表面 | `--bg` `--layer` `--layer-solid` `--card` `--card-hover` `--acrylic` `--dialog` `--dialog-footer` | 窗口底 / 侧栏表头 / 卡片 / 浮层 / 对话框 |
+| 描边 | `--stroke` `--stroke-strong` | 分隔线、控件边框 |
+| 文字 | `--text` `--text-2` `--text-3` `--on-accent` | 主 / 次 / 三级文字 |
+| 悬停 | `--subtle-hover` `--subtle-press` | hover / active 反馈面 |
+| 强调 | `--accent` `--accent-hover` `--accent-soft` | 主按钮、选中态、单选 |
+| 功能色 | `--success` `--warning` `--danger` `--info` `--brand` `--game`（各带 `-soft` 变体） | 状态提示、软件类型徽标、危险操作 |
+| 投影 | `--shadow-flyout` `--shadow-dialog` | 浮出菜单 / 对话框 |
+
+**2026-10-03 起样式层已从 Tailwind 改为手写原生 CSS**（`a7f8c62`）。`index.css` 现在
+1,208 行，分 `@layer base`（从 Tailwind v4 preflight 抄来的重置）+ `@layer components`
+（360 个手写语义类）。要点：
+
+- **组件里写语义类**（`.nav-item` `.btn` `.dialog-*` `.checkbox-box--on` …），不写工具类。
+  新增样式就往 `@layer components` 里加一条规则，不要引入构建期工具。
+- 颜色一律 `var(--*)`；**不再有 `dark:` 变体**（明暗靠属性，见规则 2）。
+- `cn()` 只是 `clsx`（`tailwind-merge` 已移除，它对语义类是空转）。
 
 规则：
 
@@ -214,18 +226,27 @@ $big.Save("$env:TEMP\ico.png",'Png')           # 打开看，必须是新设计
    改颜色时改映射表，不要改调用点的字符串。
 4. **两处刻意不随主题变**：`--console-*`（卸载日志 / 错误详情的终端式深底）、
    `AppIcon` 的 `TILE_COLORS`（12 色软件身份色块，在 `utils/format.ts`）。
-5. `index.css` 首行是 `@import "tailwindcss" source(none)` + `@source "./**/*.{ts,tsx}"`。
-   **别删**：Tailwind v4 默认会自动探测内容源，不关掉的话它会把上一次构建产物
-   `dist/index.html` 里内联的旧类名也扫进去，已删除的 `dark:`/`zinc-*` 类会死灰复燃，
-   产物凭空多出 30 KB 死 CSS。
+5. **Tailwind 已移除**（`tailwindcss` / `@tailwindcss/vite` / `tailwind-merge` 都不在依赖里，
+   `vite.config.ts` 里也没有 `tailwindcss()` 插件）。**别再加回来**：它靠扫描源文件猜哪些类
+   被用了，而本项目用 `vite-plugin-singlefile`，上次构建内联进 `dist/index.html` 的旧类名
+   会被重新扫进去，已删的类死灰复燃（迁移前为此付过 30 KB 死 CSS 的代价）。手写 CSS 没有
+   这个自反馈。
+6. **改动界面后要复核**：`bun run build` 之后确认产物里没有工具类残留
+   （`Select-String -Path dist\index.html -Pattern '@theme|@tailwind'` 应无输出），
+   并且 `class` 串里用到的每个类在 `index.css` 都有定义 —— 写了类却漏了规则，
+   是这类手写样式最常见的静默失败。
 
 自查：
 
 ```powershell
-# 1) 源码零残留
-Select-String -Path src\**\*.tsx,src\*.css -Pattern '(zinc|indigo|amber|emerald|sky|violet|pink)-\d{2,3}|dark:'   # 只应命中 index.css 的注释
-# 2) 产物零残留
-$d = Get-Content dist\index.html -Raw; ([regex]::Matches($d,'zinc-\d{2,3}')).Count; ([regex]::Matches($d,'dark\\:')).Count   # 都要 0
+# 1) 源码零调色板硬编码（应只命中 index.css 的注释）
+Select-String -Path src\**\*.tsx,src\*.css -Pattern '(zinc|indigo|amber|emerald|sky|violet|pink)-\d{2,3}'
+# 2) 源码零 dark: 变体
+Select-String -Path src\**\*.tsx -Pattern 'dark:'
+# 3) 产物零 Tailwind 指令
+$d = Get-Content dist\index.html -Raw; ([regex]::Matches($d,'@theme|@tailwind')).Count   # 要 0
+# 4) 用到的类都有定义（手写样式最常见的静默失败：类写了，规则漏了）
+#    从源码 class 串里抽出类名，逐个确认在 index.css 里有对应规则
 ```
 
 ## 9. 验证步骤
@@ -262,11 +283,12 @@ $d -match '要确认的文案'      # 确认改动进了产物
   扩展名冲突。本项目只出 Windows 包，保持 `dev.duster.app` 不动；
   真要改就改成 `dev.duster.desktop`（会连带改数据目录）。
 
-## 11. 依赖基线（2026-10-02 全量升级到最新版）
+## 11. 依赖基线（2026-10-02 全量升级到最新版；样式层同日改为原生 CSS）
 
-前端：React 19.3.0 / Tailwind 4.3.3 / Vite 8.3.2 / TypeScript 7.0.2 / @vitejs/plugin-react 6.1.1 /
+前端：React 19.3.0 / **preact 11.0.0（兼容层）** / Vite 8.3.2 / TypeScript 7.0.2 / @vitejs/plugin-react 6.1.1 /
 @types/node 26.6.4 / vite-plugin-singlefile 2.3.3 / zustand 5.0.15 / @tanstack/react-virtual 3.14.13 /
-@tauri-apps 2.12.1（api + cli）/ plugin-dialog 2.8.1 / lucide-react 1.49.0 / clsx 2.1.1 / tailwind-merge 3.7.0。
+@tauri-apps 2.12.1（api + cli）/ plugin-dialog 2.8.1 / lucide-react 1.49.0 / clsx 2.1.1。
+**已移除**：tailwindcss、@tailwindcss/vite、tailwind-merge（见 §8）。
 
 Rust：tauri 2.12.1 / windows 0.62 / winreg 0.56 / png 0.18 / base64 0.23 / dirs 7 /
 serde 1.0.229 / chrono 0.4.45 / regex 1.13.1 / thiserror 2.0.21 / tracing 0.1.44 /
@@ -316,9 +338,9 @@ cd src-tauri && mbx clean && mbx adopt   # 下次 cargo 会自动重新建立托
 5. 新的能力该写前端还是 Rust？→ §7 末尾那条判据
 6. 改到 `target` 忽略规则了吗？→ §6，注意尾斜杠
 7. 改了依赖 / 动了 `Cargo.lock` 吗？→ §11 末尾的 mbx 恢复步骤
-8. 要暂存/提交吗？→ 本项目还不是 git 仓库；用户没明确要求就不要 init / commit / push
+8. 要暂存/提交吗？→ 用户没明确要求就不要 commit / push（仓库已在 `main`）
 9. 要删文件吗？→ 先问用户；删除走运行时可恢复删除，不要用永久删除命令
-10. 改了界面颜色/主题吗？→ §8，只用语义令牌；别加 `dark:` 变体、别删 `source(none)`
+10. 改了界面颜色/主题吗？→ §8，只用 CSS 变量令牌 + 手写语义类；别加 `dark:` 变体、别把 Tailwind 加回来
 11. 改了图标吗？→ §5.1 改 SVG 母版、`bun run icons`；**§5.2 必读**，
     光跑 `build:exe` 不换 `build.rs` 内容，exe 里还是旧图标
 12. 交付 exe 了吗？→ §3，放 `D:\Tool\duster.exe`；**不要**出安装包
