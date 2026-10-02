@@ -86,10 +86,10 @@
 ## 5. 运行方式
 
 ```bash
-npm run dev                         # 浏览器预览：自动使用模拟后端
-npx tauri dev                       # Windows 桌面调试，真实 Rust IPC
-npx tauri build                     # 生成 NSIS / MSI 安装包
-npx tauri build --features portable # 便携模式（配置、日志、备份置于程序目录）
+bun run dev                             # 浏览器预览：自动使用模拟后端
+bun run tauri dev                       # Windows 桌面调试，真实 Rust IPC
+bun run tauri build                     # 生成 NSIS / MSI 安装包
+bun run tauri build --features portable # 便携模式（配置、日志、备份置于程序目录）
 ```
 
-> 需要 Windows 10/11、Rust MSVC 工具链及 WebView2。运行 `cargo check --manifest-path src-tauri/Cargo.toml` 可单独验证 Rust；`npm run build` 只构建前端，不会编译 Rust。
+> 需要 Windows 10/11、Rust MSVC 工具链及 WebView2。运行 `cargo check --manifest-path src-tauri/Cargo.toml` 可单独验证 Rust；`bun run build` 只构建前端，不会编译 Rust。
