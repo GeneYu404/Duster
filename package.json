@@ -1,7 +1,8 @@
 {
-  "name": "react-vite-tailwind",
+  "name": "duster",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Duster 拂尘 — Windows 已安装软件管理、卸载与残留清理工具",
   "type": "module",
   "scripts": {
     "dev": "vite",
