@@ -7,7 +7,7 @@ import { Button, IconButton, Kbd } from './ui';
 export const SEARCH_INPUT_ID = 'duster-global-search';
 
 /**
- * 品牌标识：与 `src-tauri/icons/source-1024.png` 同一形状（等轴六边形包裹轮廓 +
+ * 品牌标识：与仓库根的 `icon.png`（1024×1024 图标母版）同一形状（等轴六边形包裹轮廓 +
  * 居中减号）。原来用的 lucide `PackageMinus` 在 18px 下中线会和横杠连成「＋」，
  * 语义从"卸载"变成"添加"，所以改成自绘路径。
  */

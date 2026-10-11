@@ -117,7 +117,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (e) {
       get().reportError(e);
     }
-    get().log('info', `Duster 拂尘 started (${backendKind === 'tauri' ? 'Tauri backend' : 'browser preview with simulated data'})`);
+    get().log('info', `Duster 拂尘 started (${backendKind === 'mygo' ? 'Go + MyGo backend' : 'browser preview with simulated data'})`);
     await get().refresh();
     set({ initialised: true });
   },

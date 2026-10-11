@@ -6,11 +6,9 @@
       "name": "react-vite-tailwind",
       "dependencies": {
         "@tanstack/react-virtual": "^3.14.13",
-        "@tauri-apps/api": "^2.12.1",
-        "@tauri-apps/cli": "^2.12.1",
-        "@tauri-apps/plugin-dialog": "^2.8.1",
         "clsx": "2.1.1",
         "lucide-react": "^1.49.0",
+        "mygo-runtime": "0.3.7",
         "preact": "^11.0.0",
         "react": "19.3.0",
         "react-dom": "19.3.0",
@@ -21,6 +19,7 @@
         "@types/react": "19.3.0",
         "@types/react-dom": "19.3.0",
         "@vitejs/plugin-react": "6.1.1",
+        "mygo-cli": "0.3.7",
         "typescript": "7.0.2",
         "vite": "8.3.2",
         "vite-plugin-singlefile": "2.3.3",
@@ -28,6 +27,18 @@
     },
   },
   "packages": {
+    "@egoist/mygo-cli-darwin-arm64": ["@egoist/mygo-cli-darwin-arm64@0.3.7", "https://registry.npmmirror.com/@egoist/mygo-cli-darwin-arm64/-/mygo-cli-darwin-arm64-0.3.7.tgz", { "os": "darwin", "cpu": "arm64" }, "sha512-QNG8qJ7yKOM4SmyVbKT21nz3qbqulD8e5wnf+/c+8iRaqGYNIXjUmxXX6vhLPH7TvtVsZXlNvcR3n+RCYkaMVw=="],
+
+    "@egoist/mygo-cli-darwin-x64": ["@egoist/mygo-cli-darwin-x64@0.3.7", "https://registry.npmmirror.com/@egoist/mygo-cli-darwin-x64/-/mygo-cli-darwin-x64-0.3.7.tgz", { "os": "darwin", "cpu": "x64" }, "sha512-Y9LgKGwRmDFM7s5C8fh1E9DfMa86ySgS4tO6YOYU5eHG3WagzDVitfWAYjqGICKPfUUGXXKWOF/UXr4FzdI05A=="],
+
+    "@egoist/mygo-cli-linux-arm64": ["@egoist/mygo-cli-linux-arm64@0.3.7", "https://registry.npmmirror.com/@egoist/mygo-cli-linux-arm64/-/mygo-cli-linux-arm64-0.3.7.tgz", { "os": "linux", "cpu": "arm64" }, "sha512-E6wibGp+DroBNclzN84oDKmxq3vTWDvNhez3+3qSlJl7mGAri8gY02brVc1zDQdp945VLRLN3UeicPrRlB7wYg=="],
+
+    "@egoist/mygo-cli-linux-x64": ["@egoist/mygo-cli-linux-x64@0.3.7", "https://registry.npmmirror.com/@egoist/mygo-cli-linux-x64/-/mygo-cli-linux-x64-0.3.7.tgz", { "os": "linux", "cpu": "x64" }, "sha512-jonK7VlLCvXhQTh0TwbTLSUvTyp5HHlDqymxLHPk1W5VZIgicz+kIatupKNL1in/y7oQteqhgxQ+agzlUlvO6w=="],
+
+    "@egoist/mygo-cli-win32-arm64": ["@egoist/mygo-cli-win32-arm64@0.3.7", "https://registry.npmmirror.com/@egoist/mygo-cli-win32-arm64/-/mygo-cli-win32-arm64-0.3.7.tgz", { "os": "win32", "cpu": "arm64" }, "sha512-XjaUDHutsLYMnrqSwSgZ9Sk8tWtkCTRLyQZbumUQAedwTEJvszxL0JbxsKGTwtwVR7hvP1S2aH4JP9srE5EHzA=="],
+
+    "@egoist/mygo-cli-win32-x64": ["@egoist/mygo-cli-win32-x64@0.3.7", "https://registry.npmmirror.com/@egoist/mygo-cli-win32-x64/-/mygo-cli-win32-x64-0.3.7.tgz", { "os": "win32", "cpu": "x64" }, "sha512-nPKVQ2aZ1NKvD0UK6s4SJQ82opWlv6TKs1bqtbBHc/R6Nn4oGt23AuUo28tomhHnZCtCzI5iUPRlMwALFS/+gw=="],
+
     "@oxc-project/types": ["@oxc-project/types@0.152.0", "https://registry.npmmirror.com/@oxc-project/types/-/types-0.152.0.tgz", {}, "sha512-oM/5rLBm2tPkg0iBgkH/FOeR3PCDpY19GTgAZjMFM8h9WI9VW7cLgzp6nwtarYKmovavIQZ+Fe/RKX/8C8O/Rw=="],
 
     "@rolldown/binding-android-arm-eabi": ["@rolldown/binding-android-arm-eabi@1.2.12", "https://registry.npmmirror.com/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.12.tgz", { "os": "android", "cpu": "arm" }, "sha512-dB/a1214qKfHMXCpgqR4OZT+jS4kTyEXbQGJPqzobt5EwH5rX080pxE37alt3RzvR1bf1Yz/yGqRfrYAxuPw0A=="],
@@ -65,34 +76,6 @@
     "@tanstack/react-virtual": ["@tanstack/react-virtual@3.14.13", "https://registry.npmmirror.com/@tanstack/react-virtual/-/react-virtual-3.14.13.tgz", { "dependencies": { "@tanstack/virtual-core": "3.17.11" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-JbDTAwtzZ99aOeCrAfW5EsE5KSq5RWh6Af2dtFwyLIIk48Ja7vm6n4axu/43T3vfjFnEGJalxJ1wyYjSQD6bSg=="],
 
     "@tanstack/virtual-core": ["@tanstack/virtual-core@3.17.11", "https://registry.npmmirror.com/@tanstack/virtual-core/-/virtual-core-3.17.11.tgz", {}, "sha512-+ILjvtHup6Y2hzQ6YzwMgX1Q+oQpxEGOXCEsCNaPoIP0VxMbizIBTmYTDtkerkIQS8/CbP1BRuyt8V/8BCsy1g=="],
-
-    "@tauri-apps/api": ["@tauri-apps/api@2.12.1", "https://registry.npmmirror.com/@tauri-apps/api/-/api-2.12.1.tgz", {}, "sha512-DeyFHa3wynpyoqTDikDEDGTJIq4LQ5USfolQGRmGIWT6JMADyxZBTDa5cAdT3tDg73rUXufPaCwN7aXBos4OnQ=="],
-
-    "@tauri-apps/cli": ["@tauri-apps/cli@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli/-/cli-2.12.1.tgz", { "optionalDependencies": { "@tauri-apps/cli-darwin-arm64": "2.12.1", "@tauri-apps/cli-darwin-x64": "2.12.1", "@tauri-apps/cli-linux-arm-gnueabihf": "2.12.1", "@tauri-apps/cli-linux-arm64-gnu": "2.12.1", "@tauri-apps/cli-linux-arm64-musl": "2.12.1", "@tauri-apps/cli-linux-riscv64-gnu": "2.12.1", "@tauri-apps/cli-linux-x64-gnu": "2.12.1", "@tauri-apps/cli-linux-x64-musl": "2.12.1", "@tauri-apps/cli-win32-arm64-msvc": "2.12.1", "@tauri-apps/cli-win32-ia32-msvc": "2.12.1", "@tauri-apps/cli-win32-x64-msvc": "2.12.1" }, "bin": { "tauri": "tauri.js" } }, "sha512-kEDEiGzG+yAc5FeLxtXpES/VN+F2C8H0r4gDVtfRLKxT9np9101d9REG/Kgo2lr0hKi0IpDsODiHnU3+naOmLg=="],
-
-    "@tauri-apps/cli-darwin-arm64": ["@tauri-apps/cli-darwin-arm64@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-darwin-arm64/-/cli-darwin-arm64-2.12.1.tgz", { "os": "darwin", "cpu": "arm64" }, "sha512-8bMnbpJ2jKO/ufrOPL65EMHC3ptw7fzeraoQkwibyfGLqIl+UCWsC0152kmNbW6r9NvVQduXqAZF5mH1QgTWhw=="],
-
-    "@tauri-apps/cli-darwin-x64": ["@tauri-apps/cli-darwin-x64@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-darwin-x64/-/cli-darwin-x64-2.12.1.tgz", { "os": "darwin", "cpu": "x64" }, "sha512-G+2qte8GNqNlEZ9ftd21rbu/APVkl3r/nzNDI7LVxEoqJWVNe9GbEgQUMH1r4PHT20Z2UxR3KjCkltIb0e/Wjg=="],
-
-    "@tauri-apps/cli-linux-arm-gnueabihf": ["@tauri-apps/cli-linux-arm-gnueabihf@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-linux-arm-gnueabihf/-/cli-linux-arm-gnueabihf-2.12.1.tgz", { "os": "linux", "cpu": "arm" }, "sha512-5b3n4DaTW+A1Zntnh4Yn44VyLrlPEpB8kMOBRfWkzNnzolBk+AYhKIfKjCLmoC8Mob3ETodxAEOMkE2YPKEWzQ=="],
-
-    "@tauri-apps/cli-linux-arm64-gnu": ["@tauri-apps/cli-linux-arm64-gnu@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-2.12.1.tgz", { "os": "linux", "cpu": "arm64" }, "sha512-APArHhDu+8pXSCkCQmvaz1nD3d8WTmlCoSS/oG475TJ6AATBvyQOAmf5qELgsQ4s2+8MOsop0Zd699RKELF1Cw=="],
-
-    "@tauri-apps/cli-linux-arm64-musl": ["@tauri-apps/cli-linux-arm64-musl@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-linux-arm64-musl/-/cli-linux-arm64-musl-2.12.1.tgz", { "os": "linux", "cpu": "arm64" }, "sha512-JaCxcLoV0oGtllVkLr4UAHWG/wTfkEunnUqnsEsGYOp0VRxnUwHg63wFBD0jU2ul5eFfSLIDS4RF2gfzsSo5Jg=="],
-
-    "@tauri-apps/cli-linux-riscv64-gnu": ["@tauri-apps/cli-linux-riscv64-gnu@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-linux-riscv64-gnu/-/cli-linux-riscv64-gnu-2.12.1.tgz", { "os": "linux", "cpu": "none" }, "sha512-K5+VXM7+SGVDwZleA2+lMgvbTVuA5e1tkiVEawu1Yxj26ZyEfO8h8xTC1rBdRX2xgJDSwCk6vPUBCS6i+Z5slQ=="],
-
-    "@tauri-apps/cli-linux-x64-gnu": ["@tauri-apps/cli-linux-x64-gnu@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-linux-x64-gnu/-/cli-linux-x64-gnu-2.12.1.tgz", { "os": "linux", "cpu": "x64" }, "sha512-Z1QGPr49HJZMktu+Spu6Q1b/f9ANadXvqZZZt2645ua1x1ev6prOgp85eiGv2jRzohFEMLo6aJyaLjLUX5KIvA=="],
-
-    "@tauri-apps/cli-linux-x64-musl": ["@tauri-apps/cli-linux-x64-musl@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-linux-x64-musl/-/cli-linux-x64-musl-2.12.1.tgz", { "os": "linux", "cpu": "x64" }, "sha512-nHuEhRPOMSJ/8RRhtMRxB9B9lVr7xxpe4DapBz8x1GIau3vdzjHHJ1hAfmw+PyayPLZ6XoaVIHPgI17rX6ii8w=="],
-
-    "@tauri-apps/cli-win32-arm64-msvc": ["@tauri-apps/cli-win32-arm64-msvc@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-2.12.1.tgz", { "os": "win32", "cpu": "arm64" }, "sha512-I0oPk2uGh86R8dAs2X5OxSP+/GqSc8jh1Px3l8EqrocSNivsRHDTh2k3PVOqdv163dlV6PIVvmhZAbH/lPfZrA=="],
-
-    "@tauri-apps/cli-win32-ia32-msvc": ["@tauri-apps/cli-win32-ia32-msvc@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-2.12.1.tgz", { "os": "win32", "cpu": "ia32" }, "sha512-baNZRBfepAJ5qNFRMwzgBk94xQmkcmTZrNDjZjnzrq2vAaTC3NAhallb/zo3hyoCGQlMS13sdovktrg46NZz6Q=="],
-
-    "@tauri-apps/cli-win32-x64-msvc": ["@tauri-apps/cli-win32-x64-msvc@2.12.1", "https://registry.npmmirror.com/@tauri-apps/cli-win32-x64-msvc/-/cli-win32-x64-msvc-2.12.1.tgz", { "os": "win32", "cpu": "x64" }, "sha512-dIFaKslrzcbesb+bBh+E1R9km241pHyj32w6D9FPtvQeYpRUFbiCLEa/2S+S0UnIytfxepp4P+X8IerGqnXeYg=="],
-
-    "@tauri-apps/plugin-dialog": ["@tauri-apps/plugin-dialog@2.8.1", "https://registry.npmmirror.com/@tauri-apps/plugin-dialog/-/plugin-dialog-2.8.1.tgz", { "dependencies": { "@tauri-apps/api": "^2.12.0" } }, "sha512-/DtE3B62JgpYuWFL5ATXM6KOXUq7pca7cJWOgSqULhZsgyjLk0PWKek1dbRDvhNBW6flNsOfWphsKnb+738Dmw=="],
 
     "@types/node": ["@types/node@26.6.4", "https://registry.npmmirror.com/@types/node/-/node-26.6.4.tgz", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-ldVPDCzj7fsaGZrLB0NuHuTvJcsNasysBAqMolr/cgxrLd1xbqxIr3XJiPnHHJUCxj5sNF1vnRj9aWnrVh5Jcg=="],
 
@@ -185,6 +168,10 @@
     "lucide-react": ["lucide-react@1.49.0", "https://registry.npmmirror.com/lucide-react/-/lucide-react-1.49.0.tgz", { "peerDependencies": { "@types/react": "*", "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" }, "optionalPeers": ["@types/react"] }, "sha512-ApfaNM4/7jBrVopqLJ84Jz8TMQ1Q1JeZ1PmKh25aeS3E1FTVcMkSh1bEQB7dfzdIrwXRP8p3z4AJjTIHHb5IIA=="],
 
     "micromatch": ["micromatch@4.0.8", "https://registry.npmmirror.com/micromatch/-/micromatch-4.0.8.tgz", { "dependencies": { "braces": "^3.0.3", "picomatch": "^2.3.1" } }, "sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA=="],
+
+    "mygo-cli": ["mygo-cli@0.3.7", "https://registry.npmmirror.com/mygo-cli/-/mygo-cli-0.3.7.tgz", { "optionalDependencies": { "@egoist/mygo-cli-darwin-arm64": "0.3.7", "@egoist/mygo-cli-darwin-x64": "0.3.7", "@egoist/mygo-cli-linux-arm64": "0.3.7", "@egoist/mygo-cli-linux-x64": "0.3.7", "@egoist/mygo-cli-win32-arm64": "0.3.7", "@egoist/mygo-cli-win32-x64": "0.3.7" }, "bin": { "mygo": "bin/mygo.js" } }, "sha512-zgVlIYfsUmoKui10R/01H6s+88px8g6JxgQEt7N7qCgjtGgFUQCXLdXpGtw7jF/bEEWsEOiNmC5eIS0aUDZ3NA=="],
+
+    "mygo-runtime": ["mygo-runtime@0.3.7", "https://registry.npmmirror.com/mygo-runtime/-/mygo-runtime-0.3.7.tgz", {}, "sha512-4otu+CmbtJR48gq3xkpIUb6YRhcetQbvUL4lcH7I/aqAgJNqLNVAqRATUEuMaDXbHkMuFskKamBbwRR9uGRsBg=="],
 
     "nanoid": ["nanoid@3.3.19", "https://registry.npmmirror.com/nanoid/-/nanoid-3.3.19.tgz", { "bin": "bin/nanoid.cjs" }, "sha512-Y2tUNy4ouw6tq5oDSKeQYGOyhkUBhNOcGV/02KC+6kd9eDGqdZd++mjMiIDilrBYvjEnCYvVtsuHCuP+okSfug=="],
 

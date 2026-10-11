@@ -3,7 +3,7 @@ import type { ParsedCommand } from '../types/app';
 const GUID_RE = '\\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\\}';
 
 /**
- * Parse an UninstallString the way the Rust `uninstaller` module does:
+ * Parse an UninstallString the way the Go `internal/uninstaller` package does:
  *  - `MsiExec.exe /I{GUID}` and `/X{GUID}` are normalised to `msiexec.exe /x {GUID}`;
  *    `quiet` appends `/qn /norestart`.
  *  - Quoted program paths are honoured ("C:\Program Files\X\unins.exe" /SILENT).

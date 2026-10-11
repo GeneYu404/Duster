@@ -27,9 +27,9 @@ export function StatusBar() {
       )}
       <span className="status-spacer" />
       {lastRefresh && <span className="status-refresh">{t('status.lastRefresh', { time: formatTime(lastRefresh) })}</span>}
-      <span className="status-backend" title={backend === 'tauri' ? 'Tauri 2 · Rust' : 'Mock backend'}>
-        {backend === 'tauri' ? <Cpu className="i12" /> : <Globe className="i12" />}
-        {backend === 'tauri' ? t('status.backendTauri') : t('status.backendMock')}
+      <span className="status-backend" title={backend === 'mygo' ? 'Go 1.27 · MyGo 3' : 'Mock backend'}>
+        {backend === 'mygo' ? <Cpu className="i12" /> : <Globe className="i12" />}
+        {backend === 'mygo' ? t('status.backendGo') : t('status.backendMock')}
       </span>
       <span className={isAdmin ? 'status-priv status-priv--admin' : 'status-priv status-priv--user'}>
         {isAdmin ? <ShieldCheck className="i12" /> : <ShieldAlert className="i12" />}

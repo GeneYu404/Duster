@@ -206,7 +206,13 @@ export const DEFAULT_SETTINGS: Settings = {
   requestAdminOnStartup: false,
   showSystemComponents: false,
   showUpdates: false,
-  showStoreApps: true,
+  // 商店应用扫描要在启动路径上拉起 powershell.exe（隐藏窗口 + -ExecutionPolicy
+  // Bypass）——「GUI 程序一启动就偷偷执行 PowerShell」是反病毒启发式里权重最高
+  // 的 IOC 之一。本工具未签名 + Go 构建 + 清理类能力，正好撞上 Backdoor/Agent
+  // 通用画像（VirusTotal 3/71）。默认关掉让启动路径零子进程；要用时在设置里打开，
+  // 打开即扫（useAppStore.updateSettings 已含重扫），功能不变。理由详见
+  // internal/model 的 DefaultSettings 注释，**别顺手改回 true**。
+  showStoreApps: false,
   enableLeftoverScan: true,
   scanAfterUninstall: true,
   useRecycleBin: true,

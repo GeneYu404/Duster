@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { FolderOpen, Settings as SettingsIcon } from 'lucide-react';
-import { open } from '@tauri-apps/plugin-dialog';
 import { useT } from '../../store/hooks';
 import { useAppStore } from '../../store/useAppStore';
+import { pickBackupDir } from '../../ipc/commands';
 import type { Language, LogLevel, Settings, Theme } from '../../types/app';
 import { Button, Modal, SectionTitle, Segmented, Select, Toggle } from '../ui';
 
@@ -68,7 +68,12 @@ export function SettingsDialog() {
           <SectionTitle>{t('st.list')}</SectionTitle>
           <Toggle checked={draft.showSystemComponents} onChange={(v) => patch({ showSystemComponents: v })} label={t('st.showSystem')} />
           <Toggle checked={draft.showUpdates} onChange={(v) => patch({ showUpdates: v })} label={t('st.showUpdates')} />
-          <Toggle checked={draft.showStoreApps} onChange={(v) => patch({ showStoreApps: v })} label={t('st.showStore')} />
+          <Toggle
+            checked={draft.showStoreApps}
+            onChange={(v) => patch({ showStoreApps: v })}
+            label={t('st.showStore')}
+            description={t('st.showStoreNote')}
+          />
 
           <SectionTitle>{t('st.privilege')}</SectionTitle>
           <Toggle checked={draft.requestAdminOnStartup} onChange={(v) => patch({ requestAdminOnStartup: v })} label={t('st.requestAdmin')} description={t('st.requestAdminNote')} />
@@ -103,12 +108,12 @@ export function SettingsDialog() {
               />
               <Button
                 icon={<FolderOpen className="i14" />}
-                disabled={backend !== 'tauri'}
-                title={backend !== 'tauri' ? 'Tauri only' : undefined}
+                disabled={backend !== 'mygo'}
+                title={backend !== 'mygo' ? '仅桌面版可用' : undefined}
                 onClick={() => {
-                  void open({ directory: true, multiple: false, defaultPath: draft.backupDirectory })
+                  void pickBackupDir(draft.backupDirectory)
                     .then((path) => {
-                      if (typeof path === 'string') patch({ backupDirectory: path });
+                      if (path) patch({ backupDirectory: path });
                     })
                     .catch(reportError);
                 }}

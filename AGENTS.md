@@ -1,14 +1,20 @@
 # AGENTS.md
 
 > AI agent / 协作者的工作守则。**先读这页，再动手改东西。**
+>
 > 本文件只放规则与本项目特有的坑；架构与模块说明在 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ## 0. 这是什么
 
 **Duster 拂尘** —— Windows 10/11 已安装软件管理 / 卸载 / 残留清理工具，
 对标 Geek Uninstaller / HiBit Uninstaller，代码、UI、文案、图标均为独立实现。
-Tauri 2 + Rust 后端，React 19（跑在 **Preact 兼容层**上）+ TypeScript + Vite 前端，
+**Go 1.27 + MyGo 3** 后端（跑在系统自带的 WebView2 上），
+React 19（跑在 **Preact 兼容层**上）+ TypeScript + Vite 前端，
 样式是**手写原生 CSS**（不再用 Tailwind，见 §8）。
+
+> 2026-10-11 从 **Tauri 2 + Rust** 整体改写为 Go + MyGo，Rust 版（含 `src-tauri/`）已删除。
+> React 组件一行没动，只换了与外壳耦合的桥接层 `src/ipc/commands.ts`。
+> 改名对照见 [docs/go-shell.md](docs/go-shell.md) 的命令映射表。
 
 对外名称固定：**英文 `Duster`，中文「拂尘」**。改名不是改一处字符串，见 §4。
 
@@ -16,16 +22,15 @@ Tauri 2 + Rust 后端，React 19（跑在 **Preact 兼容层**上）+ TypeScript
 
 | 想了解 | 看 |
 | --- | --- |
-| 目录结构、数据模型、21 个 IPC 命令与事件表 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| 目录结构、数据模型、22 个 IPC 命令与事件表 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Go 外壳（为什么是 MyGo、命令映射、协议差异、已知边界） | [docs/go-shell.md](docs/go-shell.md) |
 
 ## 2. 运行时与包管理器
 
 **只用 Bun**（1.4+）。
 
 - 锁文件是 `bun.lock`，**不要**生成 / 提交 `package-lock.json`；不要主动 `npm install`
-- `src-tauri/tauri.conf.json` 的 `beforeDevCommand` / `beforeBuildCommand` 必须写 `bun run …`，不是 `npm run …`
-
-已于 2026-10-02 从 npm 迁到 Bun（`bun.lock` 已入库，`package-lock.json` 走可恢复删除）。
+- `mygo.config.ts` 的 `devCommand` / `buildCommand` 必须写 `bun run …`，不是 `npm run …`
 
 ## 3. 构建与交付
 
@@ -33,39 +38,52 @@ Tauri 2 + Rust 后端，React 19（跑在 **Preact 兼容层**上）+ TypeScript
 
 ```bash
 bun run typecheck     # tsc --noEmit
-bun run build         # vite build
-bun run build:exe     # = tauri build --no-bundle，约 2 分钟（大部分在 LTO 链接）
+bun run build         # mygo build（含 NSIS，脚本会剔除安装包）
+bun run build:exe     # = tools\build-exe.ps1，约 10 秒
+go test ./...         # 纯逻辑：命令解析、残留匹配、导出
 ```
 
-`tauri.conf.json` 里 `bundle.active` 已设为 **`false`**，所以哪怕误跑 `bun run tauri build`
-也不会产安装包。**要出安装包时**：把 `active` 改回 `true`，或临时 `bun run tauri build --bundles nsis`。
+`tools\build-exe.ps1` 跑完 `mygo build` 后把 `*Setup*.exe` 剔除，
+再把 exe 汇总到 `build\portable\`。要连安装包一起留：
+`powershell -File tools\build-exe.ps1 -KeepInstaller`。
 
-**构建产物统一归档到 `D:\Tool`** —— `target/release/` 是构建缓存，不是交付物：
+**构建产物统一归档到 `D:\Tool`** —— `build\` 是构建缓存，不是交付物：
 
 ```powershell
-Copy-Item src-tauri\target\release\duster.exe D:\Tool\duster.exe -Force
+Copy-Item build\portable\Duster.exe D:\Tool\duster.exe -Force
 ```
 
-交付给用户的文件是 `D:\Tool\duster.exe`（5.2 MB）。
+### 3.1 ⚠️ 本机杀软会吃掉 `mygo build` 的产物（当前已知阻塞）
+
+**Kaspersky 21.26 对 `Duster.exe` 做启发式误报**：`mygo build` 正常返回 `exit=0`
+并打印 `Duster.exe 0 KB`，随后产物被实时防护删除，`build\windows-amd64\` 变成空目录。
+
+- **这不是代码缺陷。** 同一台机器上 `mygo build` 对只读文件系统的 DiskLens 完全正常。
+- 差异在 API 画像：读写注册表 + 枚举/结束进程 + 递归删除 + 拉起提权进程 + 枚举服务，
+  正是杀软对「清理工具」的标准启发式特征。
+- mygo **不给二进制签名**（只生成 icon + manifest + VS_VERSIONINFO），无法靠签名放行。
+- **处理办法由用户决定**：加 Kaspersky 排除项 / 从隔离区恢复。不要为了绕过它删功能。
+- 验证 Go 代码是否可编译**用 `CGO_ENABLED=0 go build ./...`，不要反复试 `mygo build`** ——
+  试多少次都是 0 KB。`go build` 产物放 `%TEMP%` 实测能存活。
 
 ## 4. 改名要一起改的 11 处
 
 改产品名 / 品牌名时**必须同步**改完下面全部位置，漏一处就会出现「界面叫 A、
-数据目录叫 B」的分裂状态（Rust 与前端两侧都要改，且字符串写法不同）：
+数据目录叫 B」的分裂状态（Go 侧与前端两侧都要改，且字符串写法不同）：
 
 | # | 位置 | 当前值 |
 | --- | --- | --- |
-| 1 | `src-tauri/tauri.conf.json` → `productName` | `Duster`（EXE / 安装包文件名由此而来） |
+| 1 | `mygo.config.ts` → `name` | `Duster`（EXE / 安装包文件名由此而来） |
 | 2 | 同上 → `identifier` | `dev.duster.app`（**会连带改应用数据目录**） |
-| 3 | 同上 → `app.windows[0].title` | `Duster 拂尘` |
-| 4 | `src-tauri/Cargo.toml` → `[package] name` / `[lib] name` | `duster` / `duster_lib` |
-| 5 | `src-tauri/src/main.rs` | `duster_lib::run();`（改名后不改这里会直接编译失败） |
-| 6 | `src-tauri/src/lib.rs` | 日志名 `duster.log`、tracing target `duster_lib=`、管理员标题 |
-| 7 | `src-tauri/src/commands.rs` | 事件前缀 `duster://`、配置目录 `…\Duster` |
-| 8 | `src-tauri/src/backup_manager.rs` | 恢复临时文件 `duster-restore-{pid}-{ts}.reg` |
+| 3 | `main.go` → `appTitle` | `Duster 拂尘` |
+| 4 | `go.mod` → `module` | `duster` |
+| 5 | `main.go` → `mygo.App.SetName` / 窗口标题 | 见 §3 的 admin 后缀逻辑 |
+| 6 | `internal/logging` → 日志前缀 | `duster`（文件 `duster-<日期>.log`） |
+| 7 | `internal/service` → 事件名 | `uninstall-log` / `scan-progress`（Rust 版曾用 `duster://` 前缀） |
+| 8 | `internal/backup` → 恢复临时文件 | `duster-restore-<pid>-<ns>.reg` |
 | 9 | `index.html` | `<title>`、`<meta description>`、**localStorage 键 `duster.settings.v1`** |
 | 10 | 前端 | `i18n/index.ts` 的 `appName`、`App.tsx` 的 `document.title`、`index.css` 的 `@keyframes duster-fade-in`、`Toolbar.tsx` 的 `duster-global-search`、`ipc/backend.ts` 的 `EVENTS`、`ipc/mock.ts` 与 `types/app.ts` 的备份目录 |
-| 11 | `src-tauri/icons/` | 图标文件名与 `bundle.icon` 列表 |
+| 11 | `icon.png` + `mygo.config.ts` → `icon` | 桌面图标与 exe 资源 |
 
 改完自查：
 
@@ -73,123 +91,92 @@ Copy-Item src-tauri\target\release\duster.exe D:\Tool\duster.exe -Force
 Select-String -Path <所有源码> -Pattern '旧名'   # 必须无输出
 ```
 
-## 5. `src-tauri/icons/` —— 曾经缺失，直接导致构建失败
+## 5. `icon.png` —— 母版与生成链
 
-`icons/` 下**不是仓库自带**的一套图标，而是由母版生成：
+`icon.png` 是 **1024×1024** 母版，由原 Tauri 的 `src-tauri/icons/source.svg` 光栅化而来
+（`src-tauri/` 已删，SVG 母版随 Tauri 目录一起移除；PNG 母版保留在仓库根）。
 
-```bash
-bun run icons          # = tauri icon src-tauri/icons/source-1024.png
-```
-
-母版是 `src-tauri/icons/source-1024.png`（1024×1024，**由设计稿光栅化而来，见下**）。
-**缺 `icon.ico` 时 `tauri-build` 会直接失败**（生成 Windows 资源文件失败），
-报错是 `icons/icon.ico not found`。`@tauri-apps/cli` 必须留在 `devDependencies`，
-缺了跑不了 `tauri icon`。
-
-`icons/android/`、`icons/ios/` 是 `tauri icon` 的副产物，桌面版用不到，删前先问用户。
-
-### 5.1 图标设计：母版是 SVG 光栅化，不是手画
-
-母版 `source-1024.png` 的**矢量源**是 `src-tauri/icons/source.svg`（改设计只改这个 SVG），
-光栅化用 Windows 自带的 Edge headless：
+改图标形状时改 SVG 母版并重新光栅化：
 
 ```powershell
 $edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
 & $edge --headless=new --disable-gpu --hide-scrollbars --default-background-color=00000000 `
         --force-device-scale-factor=1 --window-size=1024,1024 `
-        --screenshot="$env:TEMP\master.png" "file:///$PWD/src-tauri/icons/source.svg"
-Copy-Item "$env:TEMP\master.png" src-tauri\icons\source-1024.png -Force
-bun run icons      # 再重生成全套尺寸 + icon.ico
-bun run build:exe  # 图标进了 Rust 资源，必须重新出 exe 才生效 —— 但先读 §5.2
+        --screenshot="$env:TEMP\master.png" "file:///$PWD\icon-source.svg"
+Copy-Item "$env:TEMP\master.png" icon.png -Force
 ```
 
 ⚠️ HTML 外壳要求 `html,body{margin:0;overflow:hidden}` + `<svg width="1024" height="1024">`，
-否则截出来不是 1024×1024（`tauri icon` 会报错）。裸 `.svg` 文件可以直接喂给 Edge，
-不必套 HTML。
-
-### 5.2 改完图标，exe 里的图标**不会**自动更新（踩过三次才找对）
-
-`tauri-build` 生成的 `OUT_DIR/resource.rc` 里写的是**活的图标路径**，不是拷贝：
-
-```
-32512 ICON "D:\\Ai\\Duster\\src-tauri\\icons\\icon.ico"
-```
-
-所以只要 rc.exe 重跑就必然拿到新图标。问题是**它经常不重跑**：mbx 的内容寻址缓存键
-**不含 `icons/icon.ico` 的内容**，`bun run build:exe` 会跑完、日志干净、打印
-`Built application at: …`，**exe 里嵌的还是旧图标**——完全静默，无任何报错。
-（改前端主题时看不出来，因为 `dist` 变化会触发 crate 重编；只有改图标才中招。）
-
-**两个不管用的办法**（都实测过，日志都显示"成功"）：
-
-| 试过的 | 为什么没用 |
-| --- | --- |
-| 碰 `src/lib.rs` 的 mtime | 只重编 crate，build script 没重跑，`resource.rc` 与 `.res` 原样复用 |
-| `mbx clean && mbx adopt` | 删掉整个 target 后，mbx 仍从内容寻址库把 **build script 的旧输出目录连同旧 `.res` 一起还原** |
-
-**唯一可靠解法：改 `build.rs` 的内容**（哪怕只加一行注释）。build script 源码进它的
-编译指纹，内容一变 → 指纹变 → 强制重新执行 → 重新生成 `resource.rc` → rc.exe 重新嵌入。
-
-```powershell
-# 改 src-tauri\build.rs 加一行注释，然后
-bun run build:exe
-# 确认这一步真的发生了：resource.rc 的时间戳必须变成刚才
-(Get-Item src-tauri\target\release\build\duster-*\out\resource.rc).LastWriteTime
-```
-
-⚠️ 用**字节探针**查 exe 里有没有新色值是不可靠的：ICO 里 ≥64px 的档是 **PNG 压缩**存储，
-exe 里根本不存在裸 BGRA 序列；而且 4 字节模式在 5 MB 二进制里偶然命中很正常。
-**唯一可信的验证是把图标抠出来看**：
-
-```powershell
-Add-Type -AssemblyName System.Drawing
-$uniq = "$env:TEMP\ico-" + [guid]::NewGuid().ToString('N').Substring(0,8) + ".exe"
-Copy-Item 'D:\Tool\duster.exe' $uniq          # 换条路径，绕开 Windows 图标缓存
-$b = [System.Drawing.Icon]::ExtractAssociatedIcon($uniq).ToBitmap()
-$big = New-Object System.Drawing.Bitmap 256,256
-$g = [System.Drawing.Graphics]::FromImage($big)
-$g.InterpolationMode='NearestNeighbor'; $g.PixelOffsetMode='Half'
-$g.DrawImage($b,0,0,256,256); $g.Dispose()
-$big.Save("$env:TEMP\ico.png",'Png')           # 打开看，必须是新设计
-```
-
-（`build.rs` 顶部已写了这套注意事项的浓缩版，别删。）
+否则截出来不是 1024×1024。裸 `.svg` 文件可以直接喂给 Edge，不必套 HTML。
 
 **当前设计**：等轴六边形包裹轮廓 + 居中粗减号，白色，底色 `accent #005fb8 → brand2 #6b46d6`
 （与应用内标题栏标识的 `from-accent to-brand2` 同一套渐变）。应用内的 `BrandMark`
-（`Toolbar.tsx`）是同一形状的自绘 SVG —— **改图标形状时两边要一起改**，否则桌面图标和
-标题栏标识对不上。
+（`Toolbar.tsx`）是同一形状的自绘 SVG —— **改图标形状时两边要一起改**，
+否则桌面图标和标题栏标识对不上。
 
 **为什么不用 lucide 的 `PackageMinus`**：它 18px 下立方体中线会和减号横杠连成「＋」，
-语义从"卸载"变成"添加"。同理，别再换成带内部结构线的箱体画法。
+语义从「卸载」变成「添加」。同理，别再换成带内部结构线的箱体画法。
 
-`icons/duster.jpg` 是 2026-10-02 改版前的原始素材（紫底薄荷绿开箱勾），已不再参与生成，
-留着只是历史存档；要删先问用户。
+## 6. Go 侧的硬约束
 
-## 6. `src-tauri/target` —— 绝对不能动
+### 6.1 零 CGO
 
-它是 **mbx 缓存 symlink**（`mode l----` → `D:\mbx\targets\v1\<hash>`，hash 来自 `Cargo.lock`），
-编译器缓存也走 mbx（构建日志里的 `mbx[cache]: N hits` 就是它）。
+```bash
+CGO_ENABLED=0 go build ./...   # 必须通过
+```
 
-- ❌ `rm -rf` / `rmdir` / `mkdir` 这个路径，也不要手工删建来「清理」
-- ✅ 损坏时走 `mbx clean && mbx adopt`
+不要引任何需要 cgo 的依赖（`go-sqlite3`、`go-git` 之类一律拉黑）。
+交付物必须是单个纯 Go exe。
 
-本项目**是 git 仓库**（2026-10-02 初始化，远端 `github.com/GeneYu404/Duster`，分支 `main`）。
-用户没明确要求就不要 commit / push。
+### 6.2 ⚠️ 本机 Go 1.27.2 的 `intptr` 是坏的
 
-`.gitignore` 里 `src-tauri/target` 那条**不能带尾斜杠** —— 尾斜杠只匹配目录，而 git 看到的是 symlink，
-规则会静默失效，target 被当 `120000` 条目提交，克隆到别的机器就是指向 `D:\mbx\...` 的死链，
-**本地完全看不出来**。暂存后自查：`git ls-files -s | Select-String '120000'` 必须无输出。
+`C:\Program Files\Go\src\cmd\compile\internal\types\universe.go` 的预声明类型表里
+缺了 `{"intptr", TINTPTR, TINT32, TINT64}` 那一行，导致**任何用到 `intptr` 的 Go 代码
+都编译失败**，标准库与第三方模块一样中招。
+
+- 与内核交互一律用 `uintptr` / `int32` / `uint32`。`GWL_EXSTYLE` 这类本来就是 32 位 LONG，
+  用 `int32` 反而更贴切。
+- **不要**尝试修 GOROOT，那是 `C:\Program Files` 下的系统文件。
+- `internal/winos`、`internal/icon`、`internal/winreg`、`internal/backup` 里的
+  `syscall.SyscallN` 调用全部遵守这条；`unsafe.Pointer` 中转是允许的（`uintptr(p)`
+  直转不行，见 `internal/winreg/syscall_windows.go` 的注释）。
+
+### 6.3 `golang.org/x/sys/windows` v0.49 的限制
+
+- **没有导出 `POINT` / `RECT`**。自己定义（`internal/winreg` 里没有用到，
+  需要时照 Win32 原样写：`X, Y int32`）。
+- 只提供 `IsWindowVisible` / `EnumWindows` / `DwmGetWindowAttribute` /
+  `DwmSetWindowAttribute` 等少数几个，其余 Win32 调用一律
+  `syscall.NewLazyDLL` + `syscall.SyscallN`（见 `internal/winos/winos_windows.go`）。
+
+### 6.4 跨平台文件
+
+平台相关代码用构建标签分文件：`*_windows.go` / `*_other.go`。
+本项目**只在 Windows 上实测**，但保留空实现让 `go vet` / `go build` 在任何平台干净通过。
+
+### 6.5 交付前必跑
+
+```bash
+bun run typecheck          # tsc --noEmit
+go vet ./...               # 必须无输出
+gofmt -l .                 # 必须无输出
+CGO_ENABLED=0 go build ./... # 必须通过
+go test ./...              # 纯逻辑单测
+```
 
 ## 7. 提权与删除语义（不可破坏）
 
-- 默认 `asInvoker` 运行。**只有**卸载 / 删除条目 / 清理残留这三类操作走 `runas` 提权
-  （`privilege.rs` + `uninstaller.rs`），提权后主进程仍存活，不重启自身。
-- 强制删除（`force_uninstall_app`）**绝不调用软件自带的卸载程序**；扫描是只读预览，
+- 默认 `asInvoker` 运行。**只有**卸载 / 删除条目 / 清理残留这三类操作走 `runas` 提权，
+  提权的是**窄范围的辅助进程**（`reg.exe` / `sc.exe` / `schtasks.exe` / `powershell.exe`），
+  **UI 主进程始终存活，不重启自身**（`internal/winos.ElevateAndWait`）。
+- 设置里的「启动时请求管理员」是**唯一**一处以 `runas` 重启自身的地方（`Duster.requestElevation`）。
+- 强制删除（`forceUninstallApp`）**绝不调用软件自带的卸载程序**；扫描是只读预览，
   用户取消则软件与文件保持原样。
-- 删除前先备份注册表（`backup_manager.rs`），受保护路径/系统组件一律拒绝。
-- 前端只渲染 UI，**所有系统能力在 Rust**（注册表扫描、图标提取、提权、导出）。
-  判断新代码该写哪边：**它是否需要「操作系统」的知识？** 需要 → Rust。
+- 删除前先备份注册表（`internal/backup`），受保护路径/系统组件一律拒绝
+  （`leftovers.IsProtected` / `leftovers.IsProtectedKey`）。
+- `delete_leftovers` **只接受后端缓存的扫描结果 id**，前端无法注入任意路径。
+- 前端只渲染 UI，**所有系统能力在 Go**（注册表扫描、图标提取、提权、导出）。
+  判断新代码该写哪边：**它是否需要「操作系统」的知识？** 需要 → Go。
 
 ## 8. 前端主题：只用 lumina 的 Fluent 语义令牌
 
@@ -231,7 +218,7 @@ $big.Save("$env:TEMP\ico.png",'Png')           # 打开看，必须是新设计
    被用了，而本项目用 `vite-plugin-singlefile`，上次构建内联进 `dist/index.html` 的旧类名
    会被重新扫进去，已删的类死灰复燃（迁移前为此付过 30 KB 死 CSS 的代价）。手写 CSS 没有
    这个自反馈。
-6. **改动界面后要复核**：`bun run build` 之后确认产物里没有工具类残留
+6. **改动界面后要复核**：`bun run build:web` 之后确认产物里没有工具类残留
    （`Select-String -Path dist\index.html -Pattern '@theme|@tailwind'` 应无输出），
    并且 `class` 串里用到的每个类在 `index.css` 都有定义 —— 写了类却漏了规则，
    是这类手写样式最常见的静默失败。
@@ -245,22 +232,16 @@ Select-String -Path src\**\*.tsx,src\*.css -Pattern '(zinc|indigo|amber|emerald|
 Select-String -Path src\**\*.tsx -Pattern 'dark:'
 # 3) 产物零 Tailwind 指令
 $d = Get-Content dist\index.html -Raw; ([regex]::Matches($d,'@theme|@tailwind')).Count   # 要 0
-# 4) 用到的类都有定义（手写样式最常见的静默失败：类写了，规则漏了）
-#    从源码 class 串里抽出类名，逐个确认在 index.css 里有对应规则
 ```
 
 ## 9. 验证步骤
 
 ```bash
 bun run typecheck     # tsc --noEmit
-bun run build         # vite build
+bun run build:web    # vite build（只构建前端，不碰 Go）
 ```
 
-改到 Rust 时追加：
-
-```bash
-cd src-tauri && cargo check
-```
+改到 Go 时追加 §6.5 的四条。
 
 **交付前必须查产物**（源码对 ≠ 打进包了）——Vite 会把 `index.html` 与 `src/**`
 内联进单个 `dist/index.html`：
@@ -270,77 +251,39 @@ $d = Get-Content dist\index.html -Raw
 $d -match '要确认的文案'      # 确认改动进了产物
 ```
 
-出包后建议冒烟：启动 `duster.exe`，确认进程存活、窗口标题为 `Duster 拂尘`，
-再 `Stop-Process` 关掉。
+## 10. Go 侧与外壳的耦合点
 
-## 10. 已知无害告警
-
-构建末尾出现这两条**不用管**：
-
-- `warning: linker stdout: 正在创建库 …duster_lib.dll.lib` —— `[lib] crate-type` 里有
-  `cdylib`/`staticlib` 的副产物（移动端用），桌面构建也会打这行。
-- `Warn The bundle identifier … ends with .app` —— Tauri 嫌 `.app` 与 macOS bundle
-  扩展名冲突。本项目只出 Windows 包，保持 `dev.duster.app` 不动；
-  真要改就改成 `dev.duster.desktop`（会连带改数据目录）。
-
-## 11. 依赖基线（2026-10-02 全量升级到最新版；样式层同日改为原生 CSS）
-
-前端：React 19.3.0 / **preact 11.0.0（兼容层）** / Vite 8.3.2 / TypeScript 7.0.2 / @vitejs/plugin-react 6.1.1 /
-@types/node 26.6.4 / vite-plugin-singlefile 2.3.3 / zustand 5.0.15 / @tanstack/react-virtual 3.14.13 /
-@tauri-apps 2.12.1（api + cli）/ plugin-dialog 2.8.1 / lucide-react 1.49.0 / clsx 2.1.1。
-**已移除**：tailwindcss、@tailwindcss/vite、tailwind-merge（见 §8）。
-
-Rust：tauri 2.12.1 / windows 0.62 / winreg 0.56 / png 0.18 / base64 0.23 / dirs 7 /
-serde 1.0.229 / chrono 0.4.45 / regex 1.13.1 / thiserror 2.0.21 / tracing 0.1.44 /
-`rust-version = "1.85"`（从 1.77.2 提上来，否则 MSRV 感知解析器会把依赖锁在旧版）。
-
-### 升级时踩到的 API 变化（别改回去）
-
-| crate | 变化 | 本项目怎么改的 |
-| --- | --- | --- |
-| TypeScript 7 | **`baseUrl` 已被移除**；`paths` 必须相对 | `tsconfig.json` 删掉 `baseUrl`，`"@/*": ["./src/*"]` |
-| TypeScript 7 | 副作用 import 必须有类型声明（TS2882） | 新增 `src/vite-env.d.ts`（`/// <reference types="vite/client" />`） |
-| windows 0.59+ | `HANDLE` 是**新类型**不是裸指针；`HBITMAP` 不能直接传给要 `HGDIOBJ` 的 API | `icon_extractor.rs` 显式 `HGDIOBJ(info.hbmColor.0)` |
-| winreg 0.53+ | `RegValue::bytes` 变成 `Cow<'_, [u8]>` | 存快照 `v.bytes.into_owned()`；写回 `Cow::Owned(v.data.clone())` |
-| base64 0.23 | `decode` 返回 `Cow<[u8]>` 而非 `Vec<u8>` | 调用处 `.into_owned()` |
-
-### Cargo.lock 变了会让 target symlink 失配
-
-`target` 的 mbx 托管目录 hash 来自 `Cargo.lock`。**任何改动 `Cargo.lock` 的操作
-（`cargo update`、改依赖版本）之后**，构建可能报
-`failed to read plugin permissions … 系统找不到指定的路径`（指向一个不存在的 hash 目录）。
-
-恢复走标准路径，**不要手工删建 symlink**：
+改 Go 方法后必须重新生成 TS 客户端，否则前端拿不到新方法：
 
 ```bash
-cd src-tauri && mbx clean && mbx adopt   # 下次 cargo 会自动重新建立托管链接
+bun run generate      # = mygo generate，写 src\mygo.ts（**不要手改那个文件**）
 ```
 
-## 12. 已知技术债
+`src/mygo.ts` 是生成物。`src/ipc/commands.ts` 是桥接层，负责把 Go 的返回值
+转成 `types/app.ts` 的类型（主要是枚举字面量收窄）与错误归一。
 
-- `commands.rs::force_remove_app` 是死代码：未注册进 `invoke_handler`，
-  前端 `ipc/backend.ts` 也只调 `force_uninstall_app`。要么删掉，要么补上注册。
-- `icons/android/`、`icons/ios/` 无用（见 §5）。
-- 12 个原始编译错误已于 2026-10-02 修复，**改动这些文件时别改回去**：
-  `AppHandle::state` 需要 `use tauri::Manager`；`HKEY` 从 `winreg::{HKEY, RegKey}` 导入
-  （不在 `winreg::enums` 里）；`backup_manager::delete_service` / `delete_task` 必须是
-  `pub`（`commands.rs` 要调）；`leftover_scanner.rs` 里 `w` 是 `&&str` 要写 `**w`；
-  `exporter.rs` 的表头闭包改成单生命周期的 `label(labels, field)` 辅助函数
-  （闭包无法统一两个借用，返回值活不过 `'2`）。`icon_extractor.rs` 的 `GetObjectW` 修法
-  已随 windows 0.62 升级更新，见 §11。
+## 11. 已知技术债
 
-## 13. 改动前先核对清单
+- `force_remove_app` 在 Rust 版是死代码（未注册进 `invoke_handler`）。Go 版**没有**保留
+  它 —— `forceUninstallApp`（只读预览）+ `deleteLeftovers`（按缓存 id 删除）
+  已经覆盖了「不调卸载器直接清理」这条路径，且更安全（前端无法传任意路径）。
+  若要恢复成单条命令，需要重新设计它的参数面（它原本要接受前端传的 itemIds）。
+- **`mygo build` 被杀软拦截**（§3.1），当前无法在本机产出可交付 exe。等用户决定放行方式。
+- Go 侧只在 Windows 上验证过；`internal/*` 的 `*_other.go` 有非 Windows 空实现，
+  但 macOS / Linux 未实测。
+- 商店应用扫描依赖 PowerShell `Get-AppxPackage`，在禁用了 PowerShell 的策略环境下
+  会静默返回空列表（这是**有意为之**：可选功能不该拖垮主列表）。
+
+## 12. 改动前先核对清单
 
 1. 改产品名了吗？→ §4 的 11 处，漏一处就分裂
-2. 动了 `identifier` 吗？→ 会连带改 `%APPDATA%` 数据目录和 localStorage 键，属数据迁移
-3. 动到图标吗？→ §5，缺 `icon.ico` 直接构建失败
+2. 动了 `identifier` 吗？→ 会连带改 `%APPDATA%` 数据目录，属数据迁移
+3. 动了图标吗？→ §5，注意图标文件在仓库根 `icon.png`，别放进 `build\`（会被构建覆盖）
 4. 动了提权/删除路径吗？→ §7，三类操作以外一律不弹 UAC
-5. 新的能力该写前端还是 Rust？→ §7 末尾那条判据
-6. 改到 `target` 忽略规则了吗？→ §6，注意尾斜杠
-7. 改了依赖 / 动了 `Cargo.lock` 吗？→ §11 末尾的 mbx 恢复步骤
+5. 新的能力该写前端还是 Go？→ §7 末尾那条判据
+6. 改了 Go 的绑定方法吗？→ §10，跑 `bun run generate`
+7. 改了 Go 代码吗？→ §6.5 四条 + `go test ./...`
 8. 要暂存/提交吗？→ 用户没明确要求就不要 commit / push（仓库已在 `main`）
 9. 要删文件吗？→ 先问用户；删除走运行时可恢复删除，不要用永久删除命令
 10. 改了界面颜色/主题吗？→ §8，只用 CSS 变量令牌 + 手写语义类；别加 `dark:` 变体、别把 Tailwind 加回来
-11. 改了图标吗？→ §5.1 改 SVG 母版、`bun run icons`；**§5.2 必读**，
-    光跑 `build:exe` 不换 `build.rs` 内容，exe 里还是旧图标
-12. 交付 exe 了吗？→ §3，放 `D:\Tool\duster.exe`；**不要**出安装包
+11. 交付 exe 了吗？→ §3，放 `D:\Tool\Duster.exe`；**不要**出安装包；注意 §3.1 的杀软阻塞

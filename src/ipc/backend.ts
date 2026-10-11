@@ -17,6 +17,11 @@ import type {
 /**
  * Tauri command names (Rust `#[tauri::command]` functions registered in src-tauri/src/lib.rs).
  * Keeping them in one place keeps the IPC surface auditable.
+ *
+ * 2026-10-11：后端换成 Go + MyGo 之后，这些名字只作为**历史对照**保留 ——
+ * 命令名变成了 Go 的导出方法（见 src/mygo.ts，由 `bun run generate` 生成）。
+ * 前端已不再按字符串 invoke，这里保留是为了让「原命令 ↔ 新绑定方法」
+ * 的对应关系仍然可查。
  */
 export const COMMANDS = {
   listInstalledApps: 'list_installed_apps',
@@ -42,10 +47,13 @@ export const COMMANDS = {
   getLogs: 'get_logs',
 } as const;
 
-/** Events emitted by the Rust side while long operations run. */
+/**
+ * 事件名。后端换成 Go 之后由 `mygo.NewEvent` 声明，
+ * 名字保持不变，所以桥接层（src/ipc/commands.ts）不用改事件名。
+ */
 export const EVENTS = {
-  uninstallLog: 'duster://uninstall-log',
-  scanProgress: 'duster://scan-progress',
+  uninstallLog: 'uninstall-log',
+  scanProgress: 'scan-progress',
 } as const;
 
 export type UninstallArgs = { appId: string; quiet: boolean };

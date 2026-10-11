@@ -95,7 +95,7 @@ function createBackup(app: InstalledApp, kind: BackupInfo['kind'], keys: string[
 }
 
 /* ------------------------------------------------------------------ */
-/* Leftover generation (mirrors src-tauri/src/leftover_scanner.rs)     */
+/* Leftover generation (mirrors internal/leftovers)                   */
 /* ------------------------------------------------------------------ */
 
 const PROTECTED_ROOTS = [

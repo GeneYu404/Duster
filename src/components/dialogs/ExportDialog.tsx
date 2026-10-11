@@ -62,7 +62,7 @@ export function ExportDialog({ scope: minimalScope }: { scope: Scope }) {
     setWorking(true);
     try {
       const labels = Object.fromEntries(ALL_EXPORT_FIELDS.map((f) => [f, t(FIELD_LABEL[f])])) as Record<ExportField, string>;
-      if (backend === 'tauri') {
+      if (backend === 'mygo') {
         const res = await ipc.exportApps({ format, fields, labels, appIds: scope === 'all' ? undefined : scopeApps.map((a) => a.id) });
         if (res.content) downloadText(res.fileName, res.content, res.mimeType);
         pushToast('success', t('ex.success', { count: res.count, file: res.path ?? res.fileName }));

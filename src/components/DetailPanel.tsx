@@ -79,7 +79,7 @@ function Link({ href }: { href?: string }) {
       target="_blank"
       rel="noreferrer"
       onClick={(event) => {
-        if (backend === 'tauri') {
+        if (backend === 'mygo') {
           event.preventDefault();
           void ipc.openExternal(href).catch(reportError);
         }
